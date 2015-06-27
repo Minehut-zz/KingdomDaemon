@@ -1,0 +1,1 @@
+add spigot.jar and base server.properties + plugins dir with core plugin etc.
