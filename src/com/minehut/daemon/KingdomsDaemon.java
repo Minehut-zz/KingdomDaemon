@@ -101,22 +101,31 @@ public class KingdomsDaemon extends Thread implements Runnable {
 		return new File("./kingdoms").listFiles();
 	}
 	
-	public List<Kingdom> getPlayerKingdoms() {
+	public List<Kingdom> getPlayerKingdoms(MCPlayer player) {
 		List<Kingdom> playerKingdoms = new ArrayList<Kingdom>();
 		for (File s : this.playerKingdoms()) {
-			
-			
-			
-			SampleKingdom sample;
-			try {
-				BufferedReader br = new BufferedReader(new FileReader(s + "/data.json"));
-				sample = this.gson.fromJson(br, SampleKingdom.class);
-			} catch (IOException e) {
-				e.printStackTrace();
-				this.utils.logLine(LogType.ERROR, "Error loading samplekingdom's data.json!");
-				continue;
+			if (s.getName().equals(player.playerUUID)) {
+				
+				System.out.println(s.getName());
+				for (File kd : s.listFiles()) {
+					Kingdom kingdom;
+					try {
+						System.out.println(kd.getPath() + "/data.json");
+						BufferedReader br = new BufferedReader(new FileReader(kd.getPath() + "/data.json"));
+						kingdom = this.gson.fromJson(br, Kingdom.class);
+						
+					} catch (IOException e) {
+						e.printStackTrace();
+						this.utils.logLine(LogType.ERROR, "Error loading samplekingdom's data.json!");
+						continue;
+					}
+					if (kingdom!=null)
+						playerKingdoms.add(kingdom);
+				}
+				/*
+						
+					*/
 			}
-			
 		}
 		
 		

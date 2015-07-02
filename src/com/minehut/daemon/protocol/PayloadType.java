@@ -3,7 +3,9 @@ package com.minehut.daemon.protocol;
 public enum PayloadType {
 
 	CREATE("CREATE"), RESET("RESET"), CMD("CMD"), 
-	STATUS("STATUS"), START("START"), STOP("STOP");
+	STATUS("STATUS"), START("START"), STOP("STOP"),
+	SAMPLE_KINGDOMS_LIST("SAMPLE_KINGDOMS_LIST"),
+	PLAYER_KINGDOMS_LIST("PLAYER_KINGDOMS_LIST");
 	
 	private String type;
 	

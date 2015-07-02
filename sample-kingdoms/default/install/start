@@ -1,0 +1,3 @@
+java -XX:MaxPermSize=128M -Xmx768M -Xms768M -jar spigot.jar nogui
+wait
+echo Successful shutdown!

@@ -104,7 +104,7 @@ public class ConnectionHandler extends Thread implements Runnable {
 					
 					if (this.daemon.hasKingdom(player.playerUUID)) {
 						out.setHasKingdom(true);
-						//out.setPlayerKingdomsList(this.getP)
+						out.setPlayerKingdomsList(this.daemon.getPlayerKingdoms(player));
 					} else {
 						out.setHasKingdom(false);
 					}
@@ -116,6 +116,7 @@ public class ConnectionHandler extends Thread implements Runnable {
 		if (type == PayloadType.CREATE) {
 			CreatePayload payload = this.daemon.gson.fromJson(request.get(1), CreatePayload.class);
 			Kingdom kingdom = new Kingdom(payload.owner, payload.sample);
+			kingdom.setName(payload.owner.playerUUID + "'s kingdom");
 			FileUtil.installKingdom(kingdom);
 		} else
 		if (type == PayloadType.START) {
