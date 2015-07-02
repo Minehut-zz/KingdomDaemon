@@ -2,6 +2,7 @@ package com.minehut.daemon.tools;
 
 import org.apache.commons.io.FileUtils;
 
+import com.google.gson.Gson;
 import com.minehut.daemon.Kingdom;
 
 import java.io.*;
@@ -14,6 +15,8 @@ import java.util.Properties;
  */
 public class FileUtil {
 
+	public static Gson gson = new Gson();
+	
     public static void editServerProperties(int id, int port) {
         try {
             //Edit server.properties
@@ -40,12 +43,40 @@ public class FileUtil {
         }
     }
     
+    public static void resetKingdom(Kingdom kingdom) {
+    	File home = new File(kingdom.getHomeDir());
+    	home.delete();
+    	installKingdom(kingdom);
+    }
+    
     public static void installKingdom(Kingdom kingdom) {
     	if (!kingdom.isInstalled()) {
     		File home = new File(kingdom.getHomeDir());
     		if (!home.exists())
     			home.mkdir();
+    		saveKingdom(kingdom);
+    		File sampleDir = new File("./sample-kingdoms/" + kingdom.getSampleKingdom().getType() + "/install");
+    		System.out.println(sampleDir.toString());
+    		copyFile(sampleDir, home);
     		
+    	}
+    }
+    
+    public static void saveKingdom(Kingdom kingdom) {
+    	FileWriter writer = null;
+    	try {
+    		writer = new FileWriter(kingdom.getHomeDir() + "/data.json");
+    		writer.write(gson.toJson(kingdom));
+    	} catch (IOException e) {
+    		e.printStackTrace();
+    	} finally {
+    		if (writer!=null) {
+    			try {
+    				writer.close();
+    			} catch (IOException e) {
+    				e.printStackTrace();
+    			}
+    		}
     	}
     }
     

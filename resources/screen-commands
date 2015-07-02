@@ -1,0 +1,7 @@
+//Create a new screen named "kingdom<ID>" ID would be the port or something
+//This will create the screen silently in the background
+screen -dmS kingdom<ID> 
+//Send commands right to the screen window as if you typed them yourself
+screen -S kingdom<ID> -p 0 -X stuff 'cd /home/daemon/kingdoms/<UUID>/kingdom01/;./start'
+//Kill the screen by name after saving and stopping the server
+screen -X -S kingdom<ID> quit

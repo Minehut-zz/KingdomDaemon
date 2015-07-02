@@ -14,6 +14,7 @@ import java.util.Arrays;
 
 import com.minehut.daemon.protocol.PayloadType;
 import com.minehut.daemon.protocol.create.CreatePayload;
+import com.minehut.daemon.protocol.start.StartPayload;
 import com.minehut.daemon.protocol.status.StatusPayload;
 import com.minehut.daemon.protocol.status.StatusType;
 import com.minehut.daemon.protocol.status.out.StatusPlayerKingdomsList;
@@ -116,6 +117,10 @@ public class ConnectionHandler extends Thread implements Runnable {
 			CreatePayload payload = this.daemon.gson.fromJson(request.get(1), CreatePayload.class);
 			Kingdom kingdom = new Kingdom(payload.owner, payload.sample);
 			FileUtil.installKingdom(kingdom);
+		} else
+		if (type == PayloadType.START) {
+			StartPayload payload = this.daemon.gson.fromJson(request.get(1), StartPayload.class);
+			
 		}
 		
 		System.out.println("FOUND PAYLOAD TYPE: " + type);
