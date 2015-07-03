@@ -13,6 +13,7 @@ import com.minehut.daemon.Kingdom;
 import com.minehut.daemon.SampleKingdom;
 import com.minehut.daemon.protocol.Payload;
 import com.minehut.daemon.protocol.create.CreatePayload;
+import com.minehut.daemon.protocol.start.StartPayload;
 import com.minehut.daemon.protocol.status.PlayerKingdomsListPayload;
 import com.minehut.daemon.protocol.status.SampleKingdomListPayload;
 import com.minehut.daemon.protocol.status.out.StatusPlayerKingdomsList;
@@ -109,6 +110,11 @@ public class Start {
 			this.createKingdom(player, sample, player.playerName + "'s kingdom");
 		}
 		
+		public void startKingdom(Kingdom kingdom) {
+			StartPayload payload = new StartPayload(kingdom);
+			this.writeToSocket(payload);
+		}
+		
 	}
 	
 	
@@ -117,6 +123,7 @@ public class Start {
 		MCPlayer sq = new MCPlayer().setPlayerUUID("squeecksUUID").setPlayerName("Squeecks").setPlayerRank("admin");
 		if (daemonFactory.hasKingdom(sq)) {
 			for (Kingdom kd : daemonFactory.getPlayerKingdoms(sq)) {
+				daemonFactory.startKingdom(kd);
 				System.out.println(kd.getName());
 			}
 		} else {

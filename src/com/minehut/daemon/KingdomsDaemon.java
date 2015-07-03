@@ -19,6 +19,8 @@ public class KingdomsDaemon extends Thread implements Runnable {
 
 	private int port = 10420;
 	
+	public static int defaultPort = 40000;
+	
 	private String homeDir = ".";
 	
 	private ServerSocket serverSocket;
@@ -29,16 +31,48 @@ public class KingdomsDaemon extends Thread implements Runnable {
 	
 	private List<SampleKingdom> samples;
 	
+	private List<KingdomServer> servers;
+	
+	private List<Integer> ports;
+	
 	public KingdomsDaemon() {
 		this.utils = new Utils();
 		this.gson = new Gson();
 		
+		this.ports = new ArrayList<Integer>();
+		this.servers = new ArrayList<KingdomServer>();
 		this.samples = this.initSampleKingdoms();
 		
 		this.initDirs();
 		this.initServerSocket();
 	}
 	
+	public void addKingdomServer(KingdomServer server) {
+		this.servers.add(server);
+	}
+	
+	public boolean usedPort(int port) {
+		for (KingdomServer server : this.servers) {
+			if (server.getPort()==port)
+				return true;
+		}
+		return false;
+	}
+	
+	public void clearPort(int port) {
+		this.ports.remove(port);
+	}
+	
+	public int getFreePort() {
+		int port = -1;
+		for (int i = 1; i < 66; i++) {
+			if (!this.usedPort(i)&&!ports.contains(i)) {
+				port = defaultPort + i;
+				ports.add(i);
+			}
+		}
+		return port;
+	}
 	
 	
 	/*

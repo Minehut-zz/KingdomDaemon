@@ -1,13 +1,8 @@
 package com.minehut.daemon;
 
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.OutputStream;
-import java.io.PrintStream;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,22 +15,13 @@ import com.minehut.daemon.protocol.status.out.StatusPlayerKingdomsList;
 import com.minehut.daemon.protocol.status.out.StatusSampleList;
 import com.minehut.daemon.tools.FileUtil;
 import com.minehut.daemon.tools.LogType;
-import com.minehut.daemon.tools.mc.MCPlayer;
 
 public class ConnectionHandler extends Thread implements Runnable {
 
 	private KingdomsDaemon daemon;
-	/*
-	private BufferedReader buffReader;
-	
-	private OutputStream outStream;
-    
-	private PrintStream printStream;*/
-	
 	
 	private ObjectInputStream objectInputStream;
 	private ObjectOutputStream objectOutputStream;
-	
 	
 	private boolean isFinished = false;
 	
@@ -114,7 +100,17 @@ public class ConnectionHandler extends Thread implements Runnable {
 		} else
 		if (type == PayloadType.START) {
 			StartPayload payload = this.daemon.gson.fromJson(request.get(1), StartPayload.class);
-			
+			int port = this.daemon.getFreePort();
+			if (port!=-1) {
+				System.out.println("Found free port: " + port);
+				this.response = "{port:" + port + "}";
+				this.daemon.addKingdomServer(new KingdomServer(payload.kingdom, port));
+			} else {
+				System.out.println("No free port found");
+			}
+		} else 
+		if (type == PayloadType.STOP) {
+			//StopPayload payload = this.daemon.gson.fromJson(request.get(1), StopPayload.class);
 		}
 		
 		System.out.println("FOUND PAYLOAD TYPE: " + type);

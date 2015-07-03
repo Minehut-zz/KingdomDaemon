@@ -9,7 +9,7 @@ import java.io.PrintWriter;
 
 public class KingdomServer extends Thread {
 	
-	private int id = -1;
+	private int id = -1, port = -1;
 	
 	InputStream is;
 	
@@ -19,8 +19,21 @@ public class KingdomServer extends Thread {
 	
 	PrintWriter writer;
 	
-	public KingdomServer(int id) {
-		this.id = id;
+	private Kingdom kingdom;
+	
+	public KingdomServer(Kingdom kingdom, int id) {
+		this.kingdom = kingdom;
+		this.id = id - KingdomsDaemon.defaultPort;
+		this.port = id;
+		System.out.println("KingdomServer Thread created, ready to start with the port '" + this.port + "'");
+	}
+	
+	public int getID() {
+		return this.id;
+	}
+	
+	public int getPort() {
+		return port;
 	}
 	
 	public void runCommand(String cmd) {
@@ -36,8 +49,9 @@ public class KingdomServer extends Thread {
 	public void run() {
 		if (id==-1) 
 			return;
+		
 		try {
-			System.out.println("Starting server..");
+			//System.out.println("Starting server..");
 			
 			this.slave = new ProcessBuilder("slave" + this.id);
 			this.theProcess = this.slave.start();
@@ -45,14 +59,16 @@ public class KingdomServer extends Thread {
 			this.writer = new PrintWriter(new OutputStreamWriter(this.theProcess.getOutputStream()));
 			is = this.theProcess.getInputStream();
 			
-			System.out.println("Server started, getting output");
+			//System.out.println("Server started, getting output");
+			
 			BufferedReader br = new BufferedReader(new InputStreamReader(is));
 			String line = "";
 			
 			while ((line = br.readLine()) != null) {
 				System.out.println(line);
 			}
-			System.out.println("server closed, thread finished");
+			
+			//System.out.println("server closed, thread finished");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
