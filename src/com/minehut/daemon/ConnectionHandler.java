@@ -15,8 +15,7 @@ import java.util.Arrays;
 import com.minehut.daemon.protocol.PayloadType;
 import com.minehut.daemon.protocol.create.CreatePayload;
 import com.minehut.daemon.protocol.start.StartPayload;
-import com.minehut.daemon.protocol.status.StatusPayload;
-import com.minehut.daemon.protocol.status.StatusType;
+import com.minehut.daemon.protocol.status.PlayerKingdomsListPayload;
 import com.minehut.daemon.protocol.status.out.StatusPlayerKingdomsList;
 import com.minehut.daemon.protocol.status.out.StatusSampleList;
 import com.minehut.daemon.tools.FileUtil;
@@ -89,34 +88,28 @@ public class ConnectionHandler extends Thread implements Runnable {
 	private void parseRequest(ArrayList<String> request) {
 		PayloadType type = PayloadType.valueOf(request.get(0));
 		
-		if (type == PayloadType.STATUS) {
-			StatusPayload payload = this.daemon.gson.fromJson(request.get(1), StatusPayload.class);
-			if (payload.getStatusType() == StatusType.SAMPLE_LIST) {
-				this.response = this.daemon.gson.toJson(new StatusSampleList().setSampleList(this.daemon.getSampleKingdoms()));
-			} else 
-			if (payload.getStatusType() == StatusType.PLAYER_LIST) {
-				//this.response = this.daemon.gson.toJson(this.daemon.initPlayerKingdoms());
-			} else
-			if (payload.getStatusType() == StatusType.PLAYERS_KINGDOM_LIST) {
-				if (request.get(2)!=null) {
-					MCPlayer player = this.daemon.gson.fromJson(request.get(2), MCPlayer.class);
-					StatusPlayerKingdomsList out = new StatusPlayerKingdomsList();
-					
-					if (this.daemon.hasKingdom(player.playerUUID)) {
-						out.setHasKingdom(true);
-						out.setPlayerKingdomsList(this.daemon.getPlayerKingdoms(player));
-					} else {
-						out.setHasKingdom(false);
-					}
-					this.response = this.daemon.gson.toJson(out);
+		if (type == PayloadType.PLAYER_KINGDOMS_LIST) {
+			PlayerKingdomsListPayload payload = this.daemon.gson.fromJson(request.get(1), PlayerKingdomsListPayload.class);
+			
+				StatusPlayerKingdomsList out = new StatusPlayerKingdomsList();
+				
+				if (this.daemon.hasKingdom(payload.player.playerUUID)) {
+					out.setHasKingdom(true);
+					out.setPlayerKingdomsList(this.daemon.getPlayerKingdoms(payload.player));
+				} else {
+					out.setHasKingdom(false);
 				}
-			}
+				this.response = this.daemon.gson.toJson(out);
 			System.out.println("Status payload: " + payload);
 		} else 
+		if (type == PayloadType.SAMPLE_KINGDOMS_LIST) {
+			this.response = this.daemon.gson.toJson(new StatusSampleList().setSampleList(this.daemon.getSampleKingdoms()));
+			
+		} else
 		if (type == PayloadType.CREATE) {
 			CreatePayload payload = this.daemon.gson.fromJson(request.get(1), CreatePayload.class);
 			Kingdom kingdom = new Kingdom(payload.owner, payload.sample);
-			kingdom.setName(payload.owner.playerUUID + "'s kingdom");
+			kingdom.setName(payload.name);
 			FileUtil.installKingdom(kingdom);
 		} else
 		if (type == PayloadType.START) {

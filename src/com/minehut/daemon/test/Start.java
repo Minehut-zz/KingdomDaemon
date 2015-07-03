@@ -14,7 +14,9 @@ import com.minehut.daemon.SampleKingdom;
 import com.minehut.daemon.protocol.Payload;
 import com.minehut.daemon.protocol.create.CreatePayload;
 import com.minehut.daemon.protocol.status.PlayerKingdomsListPayload;
+import com.minehut.daemon.protocol.status.SampleKingdomListPayload;
 import com.minehut.daemon.protocol.status.out.StatusPlayerKingdomsList;
+import com.minehut.daemon.protocol.status.out.StatusSampleList;
 import com.minehut.daemon.tools.mc.MCPlayer;
 
 public class Start {
@@ -78,12 +80,12 @@ public class Start {
 		}
 		
 		public List<Kingdom> getPlayerKingdoms(MCPlayer player) {
-			List<Kingdom> kingdoms = new ArrayList<Kingdom>();
+			return this.getStatusPlayersKingoms(player).kingdoms;
 			
-			
-			
-			return kingdoms;
-			
+		}
+		
+		public boolean hasKingdom(MCPlayer player) {
+			return this.getStatusPlayersKingoms(player).hasKingdom;
 		}
 		
 		private StatusPlayerKingdomsList getStatusPlayersKingoms(MCPlayer player) {
@@ -92,11 +94,46 @@ public class Start {
 			return this.gson.fromJson(response, StatusPlayerKingdomsList.class);
 		}
 		
+		private StatusSampleList getStatusSampleList() {
+			SampleKingdomListPayload payload = new SampleKingdomListPayload();
+			String response = this.writeToSocket(payload);
+			return this.gson.fromJson(response, StatusSampleList.class);
+		}
+		
+		public void createKingdom(MCPlayer player, SampleKingdom sample, String name) {
+			CreatePayload payload = new CreatePayload(player, sample, name);
+			this.writeToSocket(payload);
+		}
+		
+		public void createKingdom(MCPlayer player, SampleKingdom sample) {
+			this.createKingdom(player, sample, player.playerName + "'s kingdom");
+		}
+		
 	}
 	
 	
+	public Start() {
+		DaemonFactory daemonFactory = new DaemonFactory("localhost", 10420);
+		MCPlayer sq = new MCPlayer().setPlayerUUID("squeecksUUID").setPlayerName("Squeecks").setPlayerRank("admin");
+		if (daemonFactory.hasKingdom(sq)) {
+			for (Kingdom kd : daemonFactory.getPlayerKingdoms(sq)) {
+				System.out.println(kd.getName());
+			}
+		} else {
+			List<SampleKingdom> samples = daemonFactory.getStatusSampleList().sampleList;
+			for (SampleKingdom skd : samples) {
+				System.out.println("Found sample kingdom: " + skd.getName());
+				if (skd.getType().equals("default")) {
+					daemonFactory.createKingdom(sq, skd);
+				}
+			}
+			System.out.println("No kingdoms found for player");
+		}
+	}
+	
 	public static void main(String[] args) {
 		
+		new Start();
 		/*
 		try {
 			Socket sock = new Socket("localhost", 10420);

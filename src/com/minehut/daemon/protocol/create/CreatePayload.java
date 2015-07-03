@@ -11,10 +11,13 @@ public class CreatePayload extends Payload {
 	
 	public SampleKingdom sample;
 	
-	public CreatePayload(MCPlayer player, SampleKingdom sample) {
+	public String name;
+	
+	public CreatePayload(MCPlayer player, SampleKingdom sample, String name) {
 		super(PayloadType.CREATE);
 		this.owner = player;
 		this.sample = sample;
+		this.name = name;
 	}
 	
 }
