@@ -1,11 +1,14 @@
 package com.minehut.daemon;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+
+import com.minehut.daemon.tools.FileUtil;
 
 public class KingdomServer extends Thread {
 	
@@ -53,9 +56,27 @@ public class KingdomServer extends Thread {
 		try {
 			//System.out.println("Starting server..");
 			
-			this.slave = new ProcessBuilder("slave" + this.id);
-			this.theProcess = this.slave.start();
+			File homeDir = new File(this.kingdom.getHomeDir());
 			
+			FileUtil.editServerProperties(this.kingdom, this.port);
+			
+			Runtime.getRuntime().exec("screen -dmS kingdom" + this.id, null, homeDir);
+			
+			
+			//String cdCMD = "cd /home/rdillender/daemon/kingdoms/" + this.kingdom.getOwner().playerUUID + "/kingdom" + this.kingdom.id;
+			//System.out.println("cdCMD" + cdCMD);
+			//Runtime.getRuntime().exec("screen -S kingdom" + this.id +" -p 0 -X stuff '" + cdCMD + "' ^M");
+			String javaCMD = "java -XX:MaxPermSize=128M -Xmx768M -Xms768M -jar spigot.jar nogui";
+			System.out.println("javaCMD: "+ javaCMD);
+			
+			Runtime.getRuntime().exec("screen -S kingdom" + this.id + " -p 0 -X stuff '" + javaCMD + "'", null, homeDir);
+			
+			
+			
+			
+			System.out.println("Kingdom started: kingdom" + this.id + " port: " + this.port);
+			//this.theProcess = Runtime.getRuntime().exec("", null, homeDir);
+			/*
 			this.writer = new PrintWriter(new OutputStreamWriter(this.theProcess.getOutputStream()));
 			is = this.theProcess.getInputStream();
 			
@@ -66,7 +87,7 @@ public class KingdomServer extends Thread {
 			
 			while ((line = br.readLine()) != null) {
 				System.out.println(line);
-			}
+			}*/
 			
 			//System.out.println("server closed, thread finished");
 		} catch (IOException e) {

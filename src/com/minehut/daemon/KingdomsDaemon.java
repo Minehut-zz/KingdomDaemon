@@ -49,6 +49,7 @@ public class KingdomsDaemon extends Thread implements Runnable {
 	
 	public void addKingdomServer(KingdomServer server) {
 		this.servers.add(server);
+		server.start();
 	}
 	
 	public boolean usedPort(int port) {
@@ -69,6 +70,7 @@ public class KingdomsDaemon extends Thread implements Runnable {
 			if (!this.usedPort(i)&&!ports.contains(i)) {
 				port = defaultPort + i;
 				ports.add(i);
+				break;
 			}
 		}
 		return port;

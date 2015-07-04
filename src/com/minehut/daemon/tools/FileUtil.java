@@ -17,11 +17,11 @@ public class FileUtil {
 
 	public static Gson gson = new Gson();
 	
-    public static void editServerProperties(int id, int port) {
+    public static void editServerProperties(Kingdom kingdom, int port) {
         try {
             //Edit server.properties
             Properties props = new Properties();
-            String propsFileName = "/home/kingdoms/kingdom" + Integer.toString(id) + "/server.properties";
+            String propsFileName = "/home/rdillender/daemon/kingdoms/" + kingdom.getOwner().playerUUID + "/kingdom" + kingdom.id + "/server.properties";
 
             //first load old one:
             FileInputStream configStream = new FileInputStream(propsFileName);

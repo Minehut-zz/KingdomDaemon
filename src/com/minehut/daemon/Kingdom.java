@@ -8,7 +8,7 @@ public class Kingdom {
 	
 	private MCPlayer owner;
 	
-	private int id = 0;
+	public int id = 0;
 	
 	private SampleKingdom sampleBase;
 	
@@ -21,6 +21,10 @@ public class Kingdom {
 		this.homeDir = "./kingdoms/" + owner.playerUUID + "/kingdom" + id;
 		
 		this.initPlayerFolder();
+	}
+	
+	public MCPlayer getOwner() {
+		return this.owner;
 	}
 	
 	public String getHomeDir() {

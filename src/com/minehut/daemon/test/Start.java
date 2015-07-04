@@ -119,7 +119,7 @@ public class Start {
 	
 	
 	public Start() {
-		DaemonFactory daemonFactory = new DaemonFactory("localhost", 10420);
+		DaemonFactory daemonFactory = new DaemonFactory("199.187.182.168", 10420);
 		MCPlayer sq = new MCPlayer().setPlayerUUID("squeecksUUID").setPlayerName("Squeecks").setPlayerRank("admin");
 		if (daemonFactory.hasKingdom(sq)) {
 			for (Kingdom kd : daemonFactory.getPlayerKingdoms(sq)) {
