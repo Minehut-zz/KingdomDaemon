@@ -1,0 +1,11 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="KingdomDaemon">
+    <output-path>$USER_HOME$/minehut/output</output-path>
+    <root id="archive" name="KingdomDaemon.jar">
+      <element id="module-output" name="KingdomDaemon" />
+      <element id="directory" name="META-INF">
+        <element id="file-copy" path="$PROJECT_DIR$/resources/MANIFEST.MF" />
+      </element>
+    </root>
+  </artifact>
+</component>

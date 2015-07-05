@@ -1,5 +1,7 @@
 package com.minehut.daemon.tools.mc;
 
+import java.util.UUID;
+
 public class MCPlayer {
 
 	public String playerUUID, playerName, rank;
@@ -7,6 +9,18 @@ public class MCPlayer {
 	public MCPlayer() {
 		this.playerUUID = "NULL";
 		this.rank = "regular";
+	}
+
+	public MCPlayer(String name, UUID uuid) {
+		this.playerName = name;
+		this.playerUUID = uuid.toString();
+		this.rank = "regular";
+	}
+
+	public MCPlayer(String name, UUID uuid, String rank) {
+		this.playerName = name;
+		this.playerUUID = uuid.toString();
+		this.rank = rank;
 	}
 	
 	public MCPlayer setPlayerName(String name) {
