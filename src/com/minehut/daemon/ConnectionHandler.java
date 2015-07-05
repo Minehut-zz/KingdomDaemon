@@ -10,6 +10,8 @@ import java.util.Arrays;
 import com.minehut.daemon.protocol.PayloadType;
 import com.minehut.daemon.protocol.create.CreatePayload;
 import com.minehut.daemon.protocol.start.StartPayload;
+import com.minehut.daemon.protocol.status.KingdomDataPayload;
+import com.minehut.daemon.protocol.status.KingdomDataPayload.KingdomDataType;
 import com.minehut.daemon.protocol.status.PlayerKingdomsListPayload;
 import com.minehut.daemon.protocol.status.out.StatusPlayerKingdomsList;
 import com.minehut.daemon.protocol.status.out.StatusSampleList;
@@ -111,6 +113,12 @@ public class ConnectionHandler extends Thread implements Runnable {
 		} else 
 		if (type == PayloadType.STOP) {
 			//StopPayload payload = this.daemon.gson.fromJson(request.get(1), StopPayload.class);
+		} else
+		if (type == PayloadType.KINGDOM_DATA) {
+			KingdomDataPayload payload = this.daemon.gson.fromJson(request.get(1), KingdomDataPayload.class);
+			if (payload.type == KingdomDataType.STARTUP) {
+				this.response = "{startup:"+ this.daemon.getServer(payload.kingdom).startup + "}";
+			}
 		}
 		
 		System.out.println("FOUND PAYLOAD TYPE: " + type);

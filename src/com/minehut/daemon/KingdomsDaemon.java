@@ -137,6 +137,17 @@ public class KingdomsDaemon extends Thread implements Runnable {
 		return new File("./kingdoms").listFiles();
 	}
 	
+	public KingdomServer getServer(Kingdom kingdom) {
+		for (KingdomServer server : this.servers) {
+			if (server.kingdom.getOwner().playerUUID.equals(kingdom.getOwner().playerUUID)) {
+				if (server.kingdom.id == kingdom.id) {
+					return server;
+				}
+			}
+		}
+		return null;
+	}
+	
 	public List<Kingdom> getPlayerKingdoms(MCPlayer player) {
 		List<Kingdom> playerKingdoms = new ArrayList<Kingdom>();
 		for (File s : this.playerKingdoms()) {
