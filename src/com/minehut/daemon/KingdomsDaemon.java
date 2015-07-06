@@ -14,6 +14,7 @@ import com.google.gson.Gson;
 import com.minehut.daemon.tools.LogType;
 import com.minehut.daemon.tools.Utils;
 import com.minehut.daemon.tools.mc.MCPlayer;
+import com.mongodb.*;
 
 public class KingdomsDaemon extends Thread implements Runnable {
 
@@ -34,6 +35,11 @@ public class KingdomsDaemon extends Thread implements Runnable {
 	private List<KingdomServer> servers;
 	
 	private List<Integer> ports;
+
+	/* Database */
+	private MongoClient mongo;
+	private DB db;
+	private DBCollection kingdomsCollection;
 	
 	public KingdomsDaemon() {
 		this.utils = new Utils();
@@ -42,9 +48,47 @@ public class KingdomsDaemon extends Thread implements Runnable {
 		this.ports = new ArrayList<Integer>();
 		this.servers = new ArrayList<KingdomServer>();
 		this.samples = this.initSampleKingdoms();
+
+		this.connect();
 		
 		this.initDirs();
 		this.initServerSocket();
+	}
+
+	private void connect() {
+		try {
+			this.mongo = new MongoClient("localhost", 27017);
+			this.db = mongo.getDB("minehut");
+			this.kingdomsCollection = db.getCollection("kingdoms");
+
+			if (this.db == null) {
+				System.out.println("Couldn't connect to database, enabling offline mode.");
+				return;
+			} else {
+				System.out.println("Successfully connected to database :)");
+			}
+
+		} catch (Exception e) {
+			System.out.println("Couldn't connect to database, enabling offline mode.");
+		}
+	}
+
+	public void insertKingdomInDatabase(Kingdom kingdom) {
+		DBObject insert = new BasicDBObject("name", kingdom.getName());
+		insert.put("ownerUUID", kingdom.getOwner().playerUUID);
+		insert.put("type", kingdom.getSampleKingdom().getName());
+
+		kingdomsCollection.insert(insert);
+		System.out.println("Inserted Kingdom " + kingdom.getName() + " into database");
+	}
+
+	public void changeKingdomNameInDatabase(String oldName, Kingdom kingdom) {
+		DBObject key = new BasicDBObject("name", oldName);
+		DBObject found = kingdomsCollection.findOne(key);
+
+		found.put("name", kingdom.getName());
+		kingdomsCollection.findAndModify(key, found);
+		System.out.println("Updated kingdom name from (" + oldName + ") to (" + kingdom.getName() + ")");
 	}
 	
 	public void addKingdomServer(KingdomServer server) {
@@ -121,6 +165,9 @@ public class KingdomsDaemon extends Thread implements Runnable {
 	
 	public Kingdom newKingdom(MCPlayer player, SampleKingdom sample) {
 		Kingdom kingdom = new Kingdom(player, sample);
+
+
+
 		return kingdom;
 	}
 	

@@ -17,6 +17,7 @@ import com.minehut.daemon.protocol.status.out.StatusPlayerKingdomsList;
 import com.minehut.daemon.protocol.status.out.StatusSampleList;
 import com.minehut.daemon.tools.FileUtil;
 import com.minehut.daemon.tools.LogType;
+import com.mongodb.*;
 
 public class ConnectionHandler extends Thread implements Runnable {
 
@@ -99,6 +100,7 @@ public class ConnectionHandler extends Thread implements Runnable {
 			Kingdom kingdom = new Kingdom(payload.owner, payload.sample);
 			kingdom.setName(payload.name);
 			FileUtil.installKingdom(kingdom);
+			this.daemon.insertKingdomInDatabase(kingdom);
 		} else
 		if (type == PayloadType.START) {
 			StartPayload payload = this.daemon.gson.fromJson(request.get(1), StartPayload.class);
@@ -123,6 +125,7 @@ public class ConnectionHandler extends Thread implements Runnable {
 		
 		System.out.println("FOUND PAYLOAD TYPE: " + type);
 	}
+
 
 	public void finish() {
 		this.isFinished = true;
