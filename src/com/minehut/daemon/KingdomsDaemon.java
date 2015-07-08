@@ -36,12 +36,17 @@ public class KingdomsDaemon extends Thread implements Runnable {
 	
 	private List<Integer> ports;
 
+	private static KingdomsDaemon instance;
+
 	/* Database */
 	private MongoClient mongo;
 	private DB db;
 	private DBCollection kingdomsCollection;
+	private DBCollection serversCollection;
 	
 	public KingdomsDaemon() {
+		instance = this;
+
 		this.utils = new Utils();
 		this.gson = new Gson();
 		
@@ -60,6 +65,7 @@ public class KingdomsDaemon extends Thread implements Runnable {
 			this.mongo = new MongoClient("localhost", 27017);
 			this.db = mongo.getDB("minehut");
 			this.kingdomsCollection = db.getCollection("kingdoms");
+			this.serversCollection = db.getCollection("servers");
 
 			if (this.db == null) {
 				System.out.println("Couldn't connect to database, enabling offline mode.");
@@ -323,6 +329,16 @@ public class KingdomsDaemon extends Thread implements Runnable {
 	public Utils getUtils() {
 		return this.utils;
 	}
-	
-	
+
+	public static KingdomsDaemon getInstance() {
+		return instance;
+	}
+
+	public DBCollection getKingdomsCollection() {
+		return kingdomsCollection;
+	}
+
+	public DBCollection getServersCollection() {
+		return serversCollection;
+	}
 }

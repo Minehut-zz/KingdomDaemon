@@ -6,7 +6,11 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
+import com.mongodb.BasicDBObject;
+import com.mongodb.DBObject;
 import org.apache.commons.io.input.Tailer;
 import org.apache.commons.io.input.TailerListener;
 import org.apache.commons.io.input.TailerListenerAdapter;
@@ -28,6 +32,8 @@ public class KingdomServer extends Thread {
 	public boolean old = false;
 
 	private long previousListSendTime;
+
+	private int playerCount = 0;
 	
 	public enum ServerState {
 		SHUTDOWN, RUNNING, STARTING, CRASHED;
@@ -115,28 +121,39 @@ public class KingdomServer extends Thread {
 	public void parseLog(String line) {
 
 		/* List Command Cooldown */
-		if (((System.currentTimeMillis() - this.previousListSendTime) / 1000) > 5) {
-			System.out.println("Testing this line for player count --> " + line);
-			if (line.contains("There are ") && line.contains(" players online:")) {
+		if (((System.currentTimeMillis() - this.previousListSendTime) / 1000) > 3) {
 
-				System.out.println("Passed check for player count line. Parsing now...");
+			/* Retrieve Player Count */
+			if (line.contains("There are ") && line.contains(" players online:")) {
 
 				String[] firstPart = line.split("There are ");
 				String[] secondPart = firstPart[1].split(" players online:");
 
 				String countString = secondPart[0];
-				System.out.println("Player Count: " + countString);
 
 				int count = Integer.parseInt(countString);
+				this.playerCount = count;
 			} else {
-				System.out.println("This line failed check for player count --> " + line);
 				if (!line.startsWith(">")) {
 					this.sendScreenCommand("list");
 					this.previousListSendTime = System.currentTimeMillis();
 				}
 			}
-		}
 
+			/* Status Upload */
+
+			DBObject query = new BasicDBObject("name", this.kingdom.getName());
+			DBObject found = KingdomsDaemon.getInstance().getServersCollection().findOne(query);
+
+			if (found == null) {
+				System.out.println("Inserting Kingdom Status: " + kingdom.getName());
+				KingdomsDaemon.getInstance().getServersCollection().insert(createDBObject());
+			} else {
+				System.out.println("Found and updating Kingdom Status: " + kingdom.getName());
+				KingdomsDaemon.getInstance().getServersCollection().findAndModify(query, createDBObject());
+			}
+
+		}
 
 
 
@@ -155,6 +172,31 @@ public class KingdomServer extends Thread {
 			String[] startupArray = line.split("Preparing spawn area: ");
 			this.startup = startupArray[1];
 		}
+	}
+
+	public DBObject createDBObject() {
+		String bungee = "k" + (this.port - 40000);
+		String motd = ""; //todo: get MOTD
+
+		DBObject obj = new BasicDBObject("name", kingdom.getName());
+		obj.put("type", "kingdom");
+		obj.put("bungee", bungee);
+		obj.put("motd", motd);
+		obj.put("rank", kingdom.getOwner().rank);
+
+		try {
+			obj.put("ip", InetAddress.getLocalHost().toString()); //todo: IP
+		} catch (UnknownHostException e) {
+			obj.put("ip", "unknown");
+			e.printStackTrace();
+		}
+
+		obj.put("port", this.port);
+		obj.put("playersOnline", this.playerCount);
+		obj.put("maxPlayers", 10); //todo: get max players
+		obj.put("lastOnline", System.currentTimeMillis());
+
+		return obj;
 	}
 	
 	public class LogListener extends TailerListenerAdapter {
