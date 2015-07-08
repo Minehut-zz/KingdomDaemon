@@ -14,6 +14,16 @@ public class Kingdom {
 	
 	private String homeDir, playerFolder, name;
 	
+	public Kingdom(MCPlayer owner, SampleKingdom sample, int id) {
+		this.owner = owner;
+		this.sampleBase = sample;
+		this.id = id;
+		this.playerFolder = "./kingdoms/" + owner.playerUUID;
+		this.homeDir = "./kingdoms/" + owner.playerUUID + "/kingdom" + id;
+		
+		this.initPlayerFolder();
+	}
+	
 	public Kingdom(MCPlayer owner, SampleKingdom sample) {
 		this.owner = owner;
 		this.sampleBase = sample;

@@ -82,6 +82,19 @@ public class KingdomsDaemon extends Thread implements Runnable {
 		System.out.println("Inserted Kingdom " + kingdom.getName() + " into database");
 	}
 
+	public String getUUIDFromDatabase(String kingdomName) {
+		DBObject r = new BasicDBObject("name", kingdomName);
+        DBObject found = kingdomsCollection.findOne(r);
+
+        if (found != null) {
+            String ownerUUID = (String) found.get("ownerUUID");
+            return ownerUUID;
+        } else {
+        /* Player not found, return default */
+            return "null";
+        }
+	}
+	
 	public void changeKingdomNameInDatabase(String oldName, Kingdom kingdom) {
 		DBObject key = new BasicDBObject("name", oldName);
 		DBObject found = kingdomsCollection.findOne(key);
@@ -195,12 +208,10 @@ public class KingdomsDaemon extends Thread implements Runnable {
 		return null;
 	}
 	
-	public List<Kingdom> getPlayerKingdoms(MCPlayer player) {
+	public List<Kingdom> getPlayerKingdoms(String UUID) {
 		List<Kingdom> playerKingdoms = new ArrayList<Kingdom>();
 		for (File s : this.playerKingdoms()) {
-			if (s.getName().equals(player.playerUUID)) {
-				
-				System.out.println(s.getName());
+			if (s.getName().equals(UUID)) {
 				for (File kd : s.listFiles()) {
 					Kingdom kingdom;
 					try {
@@ -216,14 +227,15 @@ public class KingdomsDaemon extends Thread implements Runnable {
 					if (kingdom!=null)
 						playerKingdoms.add(kingdom);
 				}
-				/*
-						
-					*/
 			}
 		}
 		
 		
 		return playerKingdoms;
+	}
+	
+	public List<Kingdom> getPlayerKingdoms(MCPlayer player) {
+		return this.getPlayerKingdoms(player.playerUUID);
 	}
 	
 	public List<SampleKingdom> initSampleKingdoms() {

@@ -17,11 +17,15 @@ public class KingdomServer extends Thread {
 	
 	private int id = -1, port = -1;
 	
-	public int startup = 0; //TODO: startup = 73%
+	public String startup = "0%"; //TODO: startup = 73%
 	
 	public Kingdom kingdom;
 	
 	public ServerState state;
+	
+	private Tailer tailer;
+	
+	public boolean old = false;
 	
 	public enum ServerState {
 		SHUTDOWN, RUNNING, STARTING, CRASHED;
@@ -31,7 +35,13 @@ public class KingdomServer extends Thread {
 		this.kingdom = kingdom;
 		this.id = id - KingdomsDaemon.defaultPort;
 		this.port = id;
-		System.out.println("KingdomServer Thread created, ready to start with the port '" + this.port + "'");
+	}
+	
+	public KingdomServer(Kingdom kingdom, int id, boolean old) {
+		this.kingdom = kingdom;
+		this.id = id - KingdomsDaemon.defaultPort;
+		this.port = id;
+		this.old = old;
 	}
 	
 	public int getID() {
@@ -41,7 +51,8 @@ public class KingdomServer extends Thread {
 	public int getPort() {
 		return port;
 	}
-	Tailer tailer;
+	
+	
 	@Override
 	public void run() {
 		if (id==-1) 
@@ -50,36 +61,29 @@ public class KingdomServer extends Thread {
 		try {
 			this.state = ServerState.STARTING;
 			FileUtil.editServerProperties(this.kingdom, this.port);
+
+			ProcessBuilder pb = new ProcessBuilder("/bin/bash", "-c", "screen -dmLS kingdom" + this.id);
+			pb.directory(new File("/home/rdillender/daemon/kingdoms/" + this.kingdom.getOwner().playerUUID + "/kingdom" + this.kingdom.id));
+			pb.start().waitFor();
 			
-		
-			String kdDir = "/home/rdillender/daemon/kingdoms/" + this.kingdom.getOwner().playerUUID + "/kingdom" + this.kingdom.id;
-			
-			new ProcessBuilder("/bin/bash", "-c", "screen -dmLS kingdom" + this.id).start().waitFor();
 			//this.sendScreenCommand("echo kingdom")
-			this.sendScreenCommand("cd " + kdDir).waitFor();
-			
-			this.sendScreenCommand("java -XX:MaxPermSize=128M -Xmx768M -Xms768M -jar spigot.jar nogui").waitFor();
 			
 			this.state = ServerState.RUNNING;
-			
-			
+			this.startServer();
 			System.out.println("Kingdom started: kingdom" + this.id + " port: " + this.port);
 			
-			File log = new File("./screenlog." + (this.id -1));
-			if (log.exists()) {
-				log.delete();
-			}
+			File log = new File("/home/rdillender/daemon/kingdoms/" + this.kingdom.getOwner().playerUUID + "/kingdom" + this.kingdom.id + "/screenlog.0");
+			
 			FileWriter writer = new FileWriter(log);
 			writer.write("STARTING KINGDOM - (KINGDOM DAEMON v4.2.0)\n");
+			writer.write("kingdomID:" + this.id + "\n");//TODO: Daemon will use this to grab kingdom data after restarting
 			writer.close();
-			
 			
 			TailerListener listener = new LogListener(this);
 		    tailer = new Tailer(log, listener);
 		    tailer.run();
 			
-		    
-		    
+
 		    new ProcessBuilder("/bin/bash", "-c", "screen -X -S kingdom" + this.id + " quit").start().waitFor(); //Should kill the screen after the kingdom shuts down
 			
 		    System.out.println("kingdom" + this.id + " has shutdown, using port " + this.port);
@@ -95,20 +99,31 @@ public class KingdomServer extends Thread {
 		
 	}
 	
+	private void startServer() throws InterruptedException {
+		String kdDir = "/home/rdillender/daemon/kingdoms/" + this.kingdom.getOwner().playerUUID + "/kingdom" + this.kingdom.id;
+		
+		this.sendScreenCommand("cd " + kdDir).waitFor();
+		this.sendScreenCommand("java -XX:MaxPermSize=128M -Xmx768M -Xms768M -jar spigot.jar nogui").waitFor();
+	}
+	
 	public void parseLog(String line) {
-		if (line.contains("Stopping the server") ||
-				line.contains("Stopping server")) {
+		if (line.contains(" INFO]: Stopping server")) {
 				this.state = ServerState.SHUTDOWN;
 				System.out.println(line);
 				tailer.stop();
 			} else 
-			if (line.contains("Done (")) {
+			if (line.contains(" INFO]: Done (")) {
+				this.startup = "100%";
 				System.out.println(line);
 			} else 
 			if (line.contains("FAILED TO BIND TO PORT!")) {
 				this.state = ServerState.SHUTDOWN;
 				System.out.println(line);
 				tailer.stop();
+			} else
+			if (line.contains("Preparing spawn area: ")) {
+				String[] startupArray = line.split("Preparing spawn area: ");
+				this.startup = startupArray[1];
 			}
 	}
 	
@@ -123,9 +138,14 @@ public class KingdomServer extends Thread {
 		}
 	}
 	
-	public Process sendScreenCommand(String cmd) throws InterruptedException, IOException {
-		return new ProcessBuilder("/bin/bash", "-c", "screen -S kingdom" + this.id + " -p 0 -X stuff '" + cmd + "'^M").start();
-
+	public Process sendScreenCommand(String cmd) {
+		Process process = null;
+		try {
+			process =  new ProcessBuilder("/bin/bash", "-c", "screen -S kingdom" + this.id + " -p 0 -X stuff '" + cmd + "'^M").start();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return process;
 	}
 	
 }

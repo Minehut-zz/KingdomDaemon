@@ -13,6 +13,8 @@ import com.minehut.daemon.SampleKingdom;
 import com.minehut.daemon.protocol.Payload;
 import com.minehut.daemon.protocol.create.CreatePayload;
 import com.minehut.daemon.protocol.start.StartPayload;
+import com.minehut.daemon.protocol.status.KingdomDataPayload;
+import com.minehut.daemon.protocol.status.KingdomDataPayload.KingdomDataType;
 import com.minehut.daemon.protocol.status.PlayerKingdomsListPayload;
 import com.minehut.daemon.protocol.status.SampleKingdomListPayload;
 import com.minehut.daemon.protocol.status.out.StatusPlayerKingdomsList;
@@ -110,6 +112,18 @@ public class DaemonFactory {
 	public void startKingdom(Kingdom kingdom) {
 		StartPayload payload = new StartPayload(kingdom);
 		this.writeToSocket(payload);
+	}
+	
+//	public class
+	
+	public String getStartup(Kingdom kingdom) {
+		return this.getKingdomData(kingdom, KingdomDataType.STARTUP);
+	}
+	
+	public String getKingdomData(Kingdom kingdom, KingdomDataType type) {
+		KingdomDataPayload payload = new KingdomDataPayload(kingdom, type);
+		String response = this.writeToSocket(payload);
+		return response;
 	}
 	
 }

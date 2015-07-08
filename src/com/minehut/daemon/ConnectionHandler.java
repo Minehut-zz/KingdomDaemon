@@ -97,10 +97,10 @@ public class ConnectionHandler extends Thread implements Runnable {
 		} else
 		if (type == PayloadType.CREATE) {
 			CreatePayload payload = this.daemon.gson.fromJson(request.get(1), CreatePayload.class);
-			Kingdom kingdom = new Kingdom(payload.owner, payload.sample);
+			Kingdom kingdom = new Kingdom(payload.owner, payload.sample, this.daemon.getPlayerKingdoms(payload.owner).size());
 			kingdom.setName(payload.name);
 			FileUtil.installKingdom(kingdom);
-			this.daemon.insertKingdomInDatabase(kingdom);
+			//this.daemon.insertKingdomInDatabase(kingdom);
 		} else
 		if (type == PayloadType.START) {
 			StartPayload payload = this.daemon.gson.fromJson(request.get(1), StartPayload.class);
