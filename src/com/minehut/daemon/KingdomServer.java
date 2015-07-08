@@ -26,6 +26,8 @@ public class KingdomServer extends Thread {
 	private Tailer tailer;
 	
 	public boolean old = false;
+
+	private long previousListSendTime;
 	
 	public enum ServerState {
 		SHUTDOWN, RUNNING, STARTING, CRASHED;
@@ -35,6 +37,8 @@ public class KingdomServer extends Thread {
 		this.kingdom = kingdom;
 		this.id = id - KingdomsDaemon.defaultPort;
 		this.port = id;
+
+		this.previousListSendTime = System.currentTimeMillis();
 	}
 	
 	public KingdomServer(Kingdom kingdom, int id, boolean old) {
@@ -42,6 +46,8 @@ public class KingdomServer extends Thread {
 		this.id = id - KingdomsDaemon.defaultPort;
 		this.port = id;
 		this.old = old;
+
+		this.previousListSendTime = System.currentTimeMillis();
 	}
 	
 	public int getID() {
@@ -107,24 +113,48 @@ public class KingdomServer extends Thread {
 	}
 	
 	public void parseLog(String line) {
-		if (line.contains(" INFO]: Stopping server")) {
-				this.state = ServerState.SHUTDOWN;
-				System.out.println(line);
-				tailer.stop();
-			} else 
-			if (line.contains(" INFO]: Done (")) {
-				this.startup = "100%";
-				System.out.println(line);
-			} else 
-			if (line.contains("FAILED TO BIND TO PORT!")) {
-				this.state = ServerState.SHUTDOWN;
-				System.out.println(line);
-				tailer.stop();
-			} else
-			if (line.contains("Preparing spawn area: ")) {
-				String[] startupArray = line.split("Preparing spawn area: ");
-				this.startup = startupArray[1];
+
+		/* List Command Cooldown */
+		if (((System.currentTimeMillis() - this.previousListSendTime) / 1000) > 5) {
+			System.out.println("Testing this line for player count --> " + line);
+			if (line.contains("There are ") && line.contains(" players online:")) {
+
+				System.out.println("Passed check for player count line. Parsing now...");
+
+				String[] firstPart = line.split("There are ");
+				String[] secondPart = firstPart[1].split(" players online:");
+
+				String countString = secondPart[0];
+				System.out.println("Player Count: " + countString);
+
+				int count = Integer.parseInt(countString);
+			} else {
+				System.out.println("This line failed check for player count --> " + line);
+				if (!line.startsWith(">")) {
+					this.sendScreenCommand("list");
+					this.previousListSendTime = System.currentTimeMillis();
+				}
 			}
+		}
+
+
+
+
+		if (line.contains(" INFO]: Stopping server")) {
+			this.state = ServerState.SHUTDOWN;
+			System.out.println(line);
+			tailer.stop();
+		} else if (line.contains(" INFO]: Done (")) {
+			this.startup = "100%";
+			System.out.println(line);
+		} else if (line.contains("FAILED TO BIND TO PORT!")) {
+			this.state = ServerState.SHUTDOWN;
+			System.out.println(line);
+			tailer.stop();
+		} else if (line.contains("Preparing spawn area: ")) {
+			String[] startupArray = line.split("Preparing spawn area: ");
+			this.startup = startupArray[1];
+		}
 	}
 	
 	public class LogListener extends TailerListenerAdapter {

@@ -118,8 +118,8 @@ public class ConnectionHandler extends Thread implements Runnable {
 		} else
 		if (type == PayloadType.KINGDOM_DATA) {
 			KingdomDataPayload payload = this.daemon.gson.fromJson(request.get(1), KingdomDataPayload.class);
-			if (payload.type == KingdomDataType.STARTUP) {
-				this.response = "{startup:"+ this.daemon.getServer(payload.kingdom).startup + "}";
+			if (payload.dataType == KingdomDataType.STARTUP) {
+				this.response = this.daemon.getServer(payload.kingdom).startup;
 			}
 		}
 		

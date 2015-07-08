@@ -10,13 +10,14 @@ public class KingdomDataPayload extends Payload {
 		STARTUP, STARTED, CRASHED;
 	}
 	
-	public KingdomDataType type;
+	public KingdomDataType dataType;
 	
 	public Kingdom kingdom;
 	
-	public KingdomDataPayload(Kingdom kingdom, KingdomDataType type) {
+	public KingdomDataPayload(Kingdom kingdom, KingdomDataType dataType) {
 		super(PayloadType.KINGDOM_DATA);
-		this.type = type;
+		this.dataType = dataType;
+		this.kingdom = kingdom;
 	}
 	
 }
