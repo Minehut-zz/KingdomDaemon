@@ -1,7 +1,7 @@
 package com.minehut.daemon.status;
 
-import com.minehut.daemon.KingdomServer;
 import com.minehut.daemon.KingdomsDaemon;
+import com.minehut.daemon.server.KingdomServer;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 
