@@ -28,10 +28,13 @@ public class KingdomServer extends Thread {
 	public ServerState state;
 	
 	private Tailer tailer;
+	private Thread tailerThread;
+	private File log;
+	
 	
 	public boolean old = false;
 
-	private long previousListSendTime;
+	private long previousListSendTime = 0L;
 
 	private int playerCount = 0;
 	
@@ -65,6 +68,12 @@ public class KingdomServer extends Thread {
 	}
 	
 	
+	private long lastTick = 0L;
+	
+	private int tailerDelay = 0;
+	private boolean tailerStarted = false;
+	
+	
 	@Override
 	public void run() {
 		if (id==-1) 
@@ -74,33 +83,66 @@ public class KingdomServer extends Thread {
 			this.state = ServerState.STARTING;
 			FileUtil.editServerProperties(this.kingdom, this.port);
 
+			log = new File("/home/rdillender/daemon/kingdoms/" + this.kingdom.getOwner().playerUUID + "/kingdom" + this.kingdom.id + "/screenlog.0");
+			
+			
 			ProcessBuilder pb = new ProcessBuilder("/bin/bash", "-c", "screen -dmLS kingdom" + this.id);
 			pb.directory(new File("/home/rdillender/daemon/kingdoms/" + this.kingdom.getOwner().playerUUID + "/kingdom" + this.kingdom.id));
 			pb.start().waitFor();
 			
+			//String kdDir = "/home/rdillender/daemon/kingdoms/" + this.kingdom.getOwner().playerUUID + "/kingdom" + this.kingdom.id;
+			
+			//this.sendScreenCommand("cd " + kdDir).waitFor();
+			this.sendScreenCommand("java -XX:MaxPermSize=128M -Xmx768M -Xms768M -jar spigot.jar nogui").waitFor();
+			
 			//this.sendScreenCommand("echo kingdom")
 			
 			this.state = ServerState.RUNNING;
-			this.startServer();
+			
 			System.out.println("Kingdom started: kingdom" + this.id + " port: " + this.port);
 			
-			File log = new File("/home/rdillender/daemon/kingdoms/" + this.kingdom.getOwner().playerUUID + "/kingdom" + this.kingdom.id + "/screenlog.0");
 			
 			FileWriter writer = new FileWriter(log);
 			writer.write("STARTING KINGDOM - (KINGDOM DAEMON v4.2.0)\n");
 			writer.write("kingdomID:" + this.id + "\n");//TODO: Daemon will use this to grab kingdom data after restarting
 			writer.close();
 			
-			TailerListener listener = new LogListener(this);
-		    tailer = new Tailer(log, listener);
-		    tailer.run();
 			
-
-		    new ProcessBuilder("/bin/bash", "-c", "screen -X -S kingdom" + this.id + " quit").start().waitFor(); //Should kill the screen after the kingdom shuts down
 			
-		    System.out.println("kingdom" + this.id + " has shutdown, using port " + this.port);
-			
-		    log.delete();
+		    
+		    while (true) {
+		    	if (this.lastTick == 0)
+		    		this.lastTick = System.currentTimeMillis();
+		    	if (((System.currentTimeMillis() - this.lastTick) / 1000) >= 10) {
+		    		System.out.println("KingdomServer Thread ticking at " + System.currentTimeMillis() + " for kingdom" + this.id);
+		    		
+		    		if (this.state == ServerState.SHUTDOWN) {
+		    			System.out.println("ServerState set to shutdown, shutting down the server!");
+		    			new ProcessBuilder("/bin/bash", "-c", "screen -X -S kingdom" + this.id + " quit").start().waitFor(); //Should kill the screen after the kingdom shuts down
+		   			 	log.delete();
+		    			break;
+		    		}
+		    		
+		    		
+		    		if (!this.tailerStarted) {
+		    			if (tailerDelay == 1) {
+		    				this.tailerStarted = true;
+			    			TailerListener listener = new LogListener(this);
+			    		    tailer = new Tailer(log, listener);
+			    		    tailerThread = new Thread(tailer);
+			    		    tailerThread.start();
+			    		    System.out.println("Starting TailerThread, hopefully at a delay.");
+			    		} else 
+			    		if (tailerDelay <= 1) {
+			    			tailerDelay++;
+			    		}	
+		    		}
+		    				    		
+		    		this.lastTick = System.currentTimeMillis();
+		    	}
+		    }
+		    
+		   
 		    
 			//TODO: upload to mongo about port?
 			//TODO: open input stream to ./logs/latest.log for parsing server logs
@@ -111,17 +153,13 @@ public class KingdomServer extends Thread {
 		
 	}
 	
-	private void startServer() throws InterruptedException {
-		String kdDir = "/home/rdillender/daemon/kingdoms/" + this.kingdom.getOwner().playerUUID + "/kingdom" + this.kingdom.id;
-		
-		this.sendScreenCommand("cd " + kdDir).waitFor();
-		this.sendScreenCommand("java -XX:MaxPermSize=128M -Xmx768M -Xms768M -jar spigot.jar nogui").waitFor();
-	}
-	
 	public void parseLog(String line) {
-
 		/* List Command Cooldown */
-		if (((System.currentTimeMillis() - this.previousListSendTime) / 1000) > 3) {
+		
+		
+		if (this.previousListSendTime==0)
+			this.previousListSendTime = System.currentTimeMillis();
+		if (((System.currentTimeMillis() - this.previousListSendTime) / 1000) >= 3) {
 
 			/* Retrieve Player Count */
 			if (line.contains("There are ") && line.contains(" players online:")) {
@@ -129,9 +167,14 @@ public class KingdomServer extends Thread {
 				String[] firstPart = line.split("There are ");
 				String[] secondPart = firstPart[1].split(" players online:");
 
-				String countString = secondPart[0];
+				System.out.println("secondPart[0]:\"" + secondPart[0] + "\"");
+				
+				String countString[] = secondPart[0].split("//");
 
-				int count = Integer.parseInt(countString);
+				System.out.println("countString[0]:" + countString[0]);
+				
+				int count = Integer.parseInt(countString[0]);
+				//TODO: countString[1] is the max players
 				this.playerCount = count;
 			} else {
 				if (!line.startsWith(">")) {
@@ -141,7 +184,7 @@ public class KingdomServer extends Thread {
 			}
 
 			/* Status Upload */
-
+/*
 			DBObject query = new BasicDBObject("name", this.kingdom.getName());
 			DBObject found = KingdomsDaemon.getInstance().getServersCollection().findOne(query);
 
@@ -152,7 +195,7 @@ public class KingdomServer extends Thread {
 				System.out.println("Found and updating Kingdom Status: " + kingdom.getName());
 				KingdomsDaemon.getInstance().getServersCollection().findAndModify(query, createDBObject());
 			}
-
+*/
 		}
 
 
@@ -160,6 +203,7 @@ public class KingdomServer extends Thread {
 		if (line.contains(" INFO]: Stopping server")) {
 			this.state = ServerState.SHUTDOWN;
 			System.out.println(line);
+			tailerThread.interrupt();
 			tailer.stop();
 		} else if (line.contains(" INFO]: Done (")) {
 			this.startup = "100%";
@@ -167,6 +211,7 @@ public class KingdomServer extends Thread {
 		} else if (line.contains("FAILED TO BIND TO PORT!")) {
 			this.state = ServerState.SHUTDOWN;
 			System.out.println(line);
+			tailerThread.interrupt();
 			tailer.stop();
 		} else if (line.contains("Preparing spawn area: ")) {
 			String[] startupArray = line.split("Preparing spawn area: ");
