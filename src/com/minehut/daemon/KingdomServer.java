@@ -36,7 +36,9 @@ public class KingdomServer extends Thread {
 
 	private long previousListSendTime = 0L;
 
-	private int playerCount = 0;
+	public int playerCount = 0;
+	public String motd = ""; //todo
+	public int maxPlayers = 10; //todo
 	
 	public enum ServerState {
 		SHUTDOWN, RUNNING, STARTING, CRASHED;
@@ -219,30 +221,6 @@ public class KingdomServer extends Thread {
 		}
 	}
 
-	public DBObject createDBObject() {
-		String bungee = "k" + (this.port - 40000);
-		String motd = ""; //todo: get MOTD
-
-		DBObject obj = new BasicDBObject("name", kingdom.getName());
-		obj.put("type", "kingdom");
-		obj.put("bungee", bungee);
-		obj.put("motd", motd);
-		obj.put("rank", kingdom.getOwner().rank);
-
-		try {
-			obj.put("ip", InetAddress.getLocalHost().toString()); //todo: IP
-		} catch (UnknownHostException e) {
-			obj.put("ip", "unknown");
-			e.printStackTrace();
-		}
-
-		obj.put("port", this.port);
-		obj.put("playersOnline", this.playerCount);
-		obj.put("maxPlayers", 10); //todo: get max players
-		obj.put("lastOnline", System.currentTimeMillis());
-
-		return obj;
-	}
 	
 	public class LogListener extends TailerListenerAdapter {
 		KingdomServer server;
@@ -264,5 +242,20 @@ public class KingdomServer extends Thread {
 		}
 		return process;
 	}
-	
+
+	public String getMotd() {
+		return motd;
+	}
+
+	public int getPlayerCount() {
+		return playerCount;
+	}
+
+	public int getMaxPlayers() {
+		return maxPlayers;
+	}
+
+	public Kingdom getKingdom() {
+		return kingdom;
+	}
 }

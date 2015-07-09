@@ -11,6 +11,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.google.gson.Gson;
+import com.minehut.daemon.status.StatusManager;
 import com.minehut.daemon.tools.LogType;
 import com.minehut.daemon.tools.Utils;
 import com.minehut.daemon.tools.mc.MCPlayer;
@@ -38,6 +39,8 @@ public class KingdomsDaemon extends Thread implements Runnable {
 
 	private static KingdomsDaemon instance;
 
+	public StatusManager statusManager;
+
 	/* Database */
 	private MongoClient mongo;
 	private DB db;
@@ -58,6 +61,8 @@ public class KingdomsDaemon extends Thread implements Runnable {
 		
 		this.initDirs();
 		this.initServerSocket();
+
+		this.statusManager = new StatusManager();
 	}
 
 	private void connect() {
@@ -340,5 +345,13 @@ public class KingdomsDaemon extends Thread implements Runnable {
 
 	public DBCollection getServersCollection() {
 		return serversCollection;
+	}
+
+	public StatusManager getStatusManager() {
+		return statusManager;
+	}
+
+	public List<KingdomServer> getServers() {
+		return servers;
 	}
 }
