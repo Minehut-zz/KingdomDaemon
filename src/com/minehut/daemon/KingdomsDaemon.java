@@ -354,4 +354,8 @@ public class KingdomsDaemon extends Thread implements Runnable {
 	public List<KingdomServer> getServers() {
 		return servers;
 	}
+
+	public List<Integer> getPorts() {
+		return ports;
+	}
 }

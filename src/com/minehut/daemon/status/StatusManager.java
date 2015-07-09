@@ -21,7 +21,7 @@ public class StatusManager {
         this.uploadInfos = new ArrayList<>();
 
         Timer timer = new Timer();
-        timer.schedule(new Upload(), 0, 5000);
+        timer.schedule(new Upload(), 0, 2000);
     }
 
     class Upload extends TimerTask {
@@ -35,7 +35,7 @@ public class StatusManager {
             this.localUploadInfos.clear();
 
             for (KingdomServer kingdomServer : KingdomsDaemon.getInstance().getServers()) {
-                this.localUploadInfos.add(new KingdomUploadInfo(kingdomServer.getName(), kingdomServer.getMotd(), kingdomServer.kingdom.getOwner().rank, kingdomServer.getPort(), kingdomServer.getPlayerCount(), kingdomServer.getMaxPlayers()));
+                this.localUploadInfos.add(new KingdomUploadInfo(kingdomServer.getKingdom().getName(), kingdomServer.getMotd(), kingdomServer.kingdom.getOwner().rank, kingdomServer.getPort(), kingdomServer.getPlayerCount(), kingdomServer.getMaxPlayers()));
             }
 
             if (!localUploadInfos.isEmpty()) {

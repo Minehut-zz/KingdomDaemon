@@ -122,7 +122,12 @@ public class KingdomServer extends Thread {
 		    			System.out.println("ServerState set to shutdown, shutting down the server!");
 		    			new ProcessBuilder("/bin/bash", "-c", "screen -X -S kingdom" + this.id + " quit").start().waitFor(); //Should kill the screen after the kingdom shuts down
 		   			 	log.delete();
-		    			break;
+						KingdomsDaemon.getInstance().getServers().remove(this);
+
+						int portIndex = KingdomsDaemon.getInstance().getPorts().indexOf(this.port);
+						KingdomsDaemon.getInstance().getPorts().remove(portIndex);
+
+						break;
 		    		}
 		    		
 		    		
