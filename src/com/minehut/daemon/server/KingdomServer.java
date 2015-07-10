@@ -111,6 +111,16 @@ public class KingdomServer extends Thread {
 		    while (true) {
 		    	if (this.lastTick == 0)
 		    		this.lastTick = System.currentTimeMillis();
+
+				if (!this.tailerStarted) {
+					this.tailerStarted = true;
+					TailerListener listener = new KingdomServerLogListener(this);
+					tailer = new Tailer(log, listener);
+					tailerThread = new Thread(tailer);
+					tailerThread.start();
+					System.out.println("Starting TailerThread, hopefully at a delay.");
+				}
+
 		    	if (((System.currentTimeMillis() - this.lastTick) / 1000) >= 10) {
 		    		System.out.println("KingdomServer Thread ticking at " + System.currentTimeMillis() + " for kingdom" + this.id);
 		    		
@@ -127,25 +137,7 @@ public class KingdomServer extends Thread {
 						int portIndex = KingdomsDaemon.getInstance().getPorts().indexOf(this.port);
 						KingdomsDaemon.getInstance().getPorts().remove(portIndex);
 
-						
-						
-						
 						break;
-		    		}
-		    		
-		    		
-		    		if (!this.tailerStarted) {
-		    			if (tailerDelay == 1) {
-		    				this.tailerStarted = true;
-			    			TailerListener listener = new KingdomServerLogListener(this);
-			    		    tailer = new Tailer(log, listener);
-			    		    tailerThread = new Thread(tailer);
-			    		    tailerThread.start();
-			    		    System.out.println("Starting TailerThread, hopefully at a delay.");
-			    		} else 
-			    		if (tailerDelay <= 1) {
-			    			tailerDelay++;
-			    		}	
 		    		}
 		    				    		
 		    		this.lastTick = System.currentTimeMillis();

@@ -42,20 +42,20 @@ public class KingdomServerLogListener extends TailerListenerAdapter {
 					this.previousListSendTime = System.currentTimeMillis();
 				}
 			}
-
-			if (line.contains(" INFO]: Stopping server")) {
-				server.setState(ServerState.SHUTDOWN);
-				System.out.println(line);
-			} else if (line.contains(" INFO]: Done (")) {
-				server.startup = "100%";
-				System.out.println(line);
-			} else if (line.contains("FAILED TO BIND TO PORT!")) {
-				server.setState(ServerState.SHUTDOWN);
-				System.out.println(line);
-			} else if (line.contains("Preparing spawn area: ")) {
-				String[] startupArray = line.split("Preparing spawn area: ");
-				server.startup = startupArray[1];
-			}
+		}
+		if (line.contains(" INFO]: Stopping server")) {
+			server.setState(ServerState.SHUTDOWN);
+			System.out.println(line);
+		} else if (line.contains(" INFO]: Done (")) {
+			server.startup = "100%";
+			System.out.println(line);
+		} else if (line.contains("FAILED TO BIND TO PORT!")) {
+			server.setState(ServerState.SHUTDOWN);
+			System.out.println(line);
+		} else if (line.contains("Preparing spawn area: ")) {
+			String[] startupArray = line.split("Preparing spawn area: ");
+			server.startup = startupArray[1];
+			System.out.println("Updated Startup Status: " + startupArray[1]);
 		}
 	}
 }

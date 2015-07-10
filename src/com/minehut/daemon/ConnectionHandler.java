@@ -59,7 +59,7 @@ public class ConnectionHandler extends Thread implements Runnable {
 				}
 				
 				for (String l : requestLines) {
-					this.daemon.getUtils().logLine(LogType.INFO, l);
+//					this.daemon.getUtils().logLine(LogType.INFO, l);
 				}
 				
 				this.parseRequest(requestLines);
@@ -90,7 +90,7 @@ public class ConnectionHandler extends Thread implements Runnable {
 					out.setHasKingdom(false);
 				}
 				this.response = this.daemon.gson.toJson(out);
-			System.out.println("Status payload: " + payload);
+//			System.out.println("Status payload: " + payload);
 		} else 
 		if (type == PayloadType.SAMPLE_KINGDOMS_LIST) {
 			this.response = this.daemon.gson.toJson(new StatusSampleList().setSampleList(this.daemon.getSampleKingdoms()));
@@ -130,7 +130,7 @@ public class ConnectionHandler extends Thread implements Runnable {
 			}
 		}
 		
-		System.out.println("FOUND PAYLOAD TYPE: " + type);
+//		System.out.println("FOUND PAYLOAD TYPE: " + type);
 	}
 
 
