@@ -91,7 +91,6 @@ public class KingdomsDaemon extends Thread implements Runnable {
 		insert.put("type", kingdom.getSampleKingdom().getName());
 
 		kingdomsCollection.insert(insert);
-		System.out.println("Inserted Kingdom " + kingdom.getName() + " into database");
 	}
 
 	public String getUUIDFromDatabase(String kingdomName) {
@@ -108,7 +107,7 @@ public class KingdomsDaemon extends Thread implements Runnable {
 	}
 	
 	public boolean isKingdom(String kingdomName) {
-		return this.getUUIDFromDatabase(kingdomName).equals("null");
+		return !this.getUUIDFromDatabase(kingdomName).equals("null");
 	}
 	
 	public Kingdom getKingdom(String kingdomName) {
@@ -121,6 +120,7 @@ public class KingdomsDaemon extends Thread implements Runnable {
 				return kingdom;
 			}
 		}
+
 		return null;
 	}
 	
