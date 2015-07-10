@@ -107,6 +107,23 @@ public class KingdomsDaemon extends Thread implements Runnable {
         }
 	}
 	
+	public boolean isKingdom(String kingdomName) {
+		return this.getUUIDFromDatabase(kingdomName).equals("null");
+	}
+	
+	public Kingdom getKingdom(String kingdomName) {
+		return this.getPlayerKingdom(this.getUUIDFromDatabase(kingdomName), kingdomName);
+	}
+	
+	public Kingdom getPlayerKingdom(String uuid, String kingdomName) {
+		for (Kingdom kingdom : this.getPlayerKingdoms(uuid)) {
+			if (kingdom.getName().equals(kingdomName)) {
+				return kingdom;
+			}
+		}
+		return null;
+	}
+	
 	public void changeKingdomNameInDatabase(String oldName, Kingdom kingdom) {
 		DBObject key = new BasicDBObject("name", oldName);
 		DBObject found = kingdomsCollection.findOne(key);

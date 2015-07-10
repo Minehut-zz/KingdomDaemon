@@ -12,6 +12,7 @@ import com.minehut.daemon.protocol.create.CreatePayload;
 import com.minehut.daemon.protocol.start.StartPayload;
 import com.minehut.daemon.protocol.status.KingdomDataPayload;
 import com.minehut.daemon.protocol.status.KingdomDataPayload.KingdomDataType;
+import com.minehut.daemon.protocol.status.KingdomPayload;
 import com.minehut.daemon.protocol.status.PlayerKingdomsListPayload;
 import com.minehut.daemon.protocol.status.out.StatusPlayerKingdomsList;
 import com.minehut.daemon.protocol.status.out.StatusSampleList;
@@ -127,6 +128,14 @@ public class ConnectionHandler extends Thread implements Runnable {
 					this.response = "offline";
 				}
 
+			}
+		} else
+		if (type == PayloadType.KINGDOM) {
+			KingdomPayload payload = this.daemon.gson.fromJson(request.get(1), KingdomPayload.class);
+			if (this.daemon.isKingdom(payload.kingdomName)) {
+				this.response = this.daemon.gson.toJson(this.daemon.getKingdom(payload.kingdomName));
+			} else {
+				this.response = "null";
 			}
 		}
 		
