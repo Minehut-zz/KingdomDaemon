@@ -4,6 +4,7 @@ import org.apache.commons.io.FileUtils;
 
 import com.google.gson.Gson;
 import com.minehut.daemon.Kingdom;
+import com.minehut.daemon.protocol.addon.Addon;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -41,6 +42,23 @@ public class FileUtil {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+    
+    public static void removeAddon(Kingdom kingdom, Addon addon) {
+    	kingdom.removeAddon(addon);
+    	saveKingdom(kingdom);
+    	//TODO: write function that gets a list of all files it installed then remove them from the system
+    	//This will allow us to remove any file we install but keep anything the plugin/mod create safe in the folder
+    	//So if they every re-installed the data would still be there. 
+    	//The Reset payload will still clear all that data however.
+    }
+    
+    public static void installAddon(Kingdom kingdom, Addon addon) {
+    	kingdom.addAddon(addon);
+    	saveKingdom(kingdom); //Updates kingdom's data.json to have the addon list in it with the new addon in the list.
+    	File home = new File(kingdom.getHomeDir());
+    	File addonDir = new File("./addons/" + addon.systemName + "/install");
+		copyFile(addonDir, home);
     }
     
     public static void resetKingdom(Kingdom kingdom) {

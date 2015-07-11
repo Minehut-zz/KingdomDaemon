@@ -1,0 +1,3 @@
+This entire directory will be installed to the kingdoms base directory.
+So folders/configs/anything will be treated as whole addon.
+This will allow for plugins + mods + anything we think we need later down the road like resource packs, maps etc will work right away in this system.

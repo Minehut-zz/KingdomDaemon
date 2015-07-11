@@ -1,7 +1,10 @@
 package com.minehut.daemon;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
+import com.minehut.daemon.protocol.addon.Addon;
 import com.minehut.daemon.tools.mc.MCPlayer;
 
 public class Kingdom {
@@ -13,6 +16,8 @@ public class Kingdom {
 	private SampleKingdom sampleBase;
 	
 	private String homeDir, playerFolder, name;
+	
+	private List<Addon> addonList = new ArrayList<Addon>();
 	
 	public Kingdom(MCPlayer owner, SampleKingdom sample, int id) {
 		this.owner = owner;
@@ -31,6 +36,19 @@ public class Kingdom {
 		this.homeDir = "./kingdoms/" + owner.playerUUID + "/kingdom" + id;
 		
 		this.initPlayerFolder();
+	}
+	
+	public void removeAddon(Addon addon) {
+		this.addonList.remove(addon);
+	}
+	
+	public void addAddon(Addon addon) {
+		System.out.println(addon.name);
+		this.addonList.add(addon);
+	}
+	
+	public List<Addon> getAddons() {
+		return this.addonList;
 	}
 	
 	public MCPlayer getOwner() {

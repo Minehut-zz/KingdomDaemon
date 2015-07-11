@@ -11,6 +11,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.google.gson.Gson;
+import com.minehut.daemon.protocol.addon.Addon;
 import com.minehut.daemon.server.KingdomServer;
 import com.minehut.daemon.status.StatusManager;
 import com.minehut.daemon.tools.LogType;
@@ -33,6 +34,8 @@ public class KingdomsDaemon extends Thread implements Runnable {
 	public Gson gson;
 	
 	private List<SampleKingdom> samples;
+	
+	private List<Addon> addons;
 	
 	private List<KingdomServer> servers;
 	
@@ -57,7 +60,8 @@ public class KingdomsDaemon extends Thread implements Runnable {
 		this.ports = new ArrayList<Integer>();
 		this.servers = new ArrayList<KingdomServer>();
 		this.samples = this.initSampleKingdoms();
-
+		this.addons = this.initAddons();
+		
 		this.connect();
 		
 		this.initDirs();
@@ -131,6 +135,10 @@ public class KingdomsDaemon extends Thread implements Runnable {
 		found.put("name", kingdom.getName());
 		kingdomsCollection.findAndModify(key, found);
 		System.out.println("Updated kingdom name from (" + oldName + ") to (" + kingdom.getName() + ")");
+	}
+	
+	public List<Addon> getAddons() {
+		return this.addons;
 	}
 	
 	public void addKingdomServer(KingdomServer server) {
@@ -267,6 +275,35 @@ public class KingdomsDaemon extends Thread implements Runnable {
 		return this.getPlayerKingdoms(player.playerUUID);
 	}
 	
+	public List<Addon> initAddons() {
+		List<Addon> addonList = new ArrayList<Addon>();
+		String baseDir = "./addons";
+		File file = new File(baseDir);
+		File[] folders = file.listFiles();
+		for (File s : folders) {
+			Addon addon;
+			BufferedReader br = null ;
+			try {
+				br = new BufferedReader(new FileReader(s + "/data.json"));
+				addon = this.gson.fromJson(br, Addon.class);
+			} catch (IOException e) {
+				e.printStackTrace();
+				this.utils.logLine(LogType.ERROR, "Error loading samplekingdom's data.json!");
+				continue;
+			} finally {
+				if (br!=null) {
+					try {
+						br.close();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+			addonList.add(addon);
+		}
+		return addonList;
+	}
+	
 	public List<SampleKingdom> initSampleKingdoms() {
 		List<SampleKingdom> samples = new ArrayList<SampleKingdom>();
 		String baseDir = "./sample-kingdoms";
@@ -298,7 +335,7 @@ public class KingdomsDaemon extends Thread implements Runnable {
 	
 	
 	private void initDirs() {
-		List<String> dirs = Arrays.asList("kingdoms", "sample-kingdoms");
+		List<String> dirs = Arrays.asList("kingdoms", "sample-kingdoms", "addons");
 		for (String dir : dirs) {
 			File file = new File("./" + dir);
 			if (!file.exists())

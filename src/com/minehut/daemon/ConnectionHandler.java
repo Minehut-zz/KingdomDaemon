@@ -8,7 +8,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import com.minehut.daemon.protocol.PayloadType;
+import com.minehut.daemon.protocol.addon.AddonPayload;
+import com.minehut.daemon.protocol.addon.AddonPayloadType;
 import com.minehut.daemon.protocol.create.CreatePayload;
+import com.minehut.daemon.protocol.reset.ResetPayload;
 import com.minehut.daemon.protocol.start.StartPayload;
 import com.minehut.daemon.protocol.status.KingdomDataPayload;
 import com.minehut.daemon.protocol.status.KingdomDataPayload.KingdomDataType;
@@ -16,7 +19,9 @@ import com.minehut.daemon.protocol.status.KingdomPayload;
 import com.minehut.daemon.protocol.status.PlayerKingdomsListPayload;
 import com.minehut.daemon.protocol.status.out.StatusPlayerKingdomsList;
 import com.minehut.daemon.protocol.status.out.StatusSampleList;
+import com.minehut.daemon.protocol.stop.StopPayload;
 import com.minehut.daemon.server.KingdomServer;
+import com.minehut.daemon.server.KingdomServer.ServerState;
 import com.minehut.daemon.tools.FileUtil;
 import com.minehut.daemon.tools.LogType;
 import com.mongodb.*;
@@ -104,6 +109,11 @@ public class ConnectionHandler extends Thread implements Runnable {
 			FileUtil.installKingdom(kingdom);
 			this.daemon.insertKingdomInDatabase(kingdom);
 		} else
+		if (type == PayloadType.RESET) {
+			ResetPayload payload = this.daemon.gson.fromJson(request.get(1), ResetPayload.class);
+			FileUtil.resetKingdom(payload.kingdom);
+			this.daemon.insertKingdomInDatabase(payload.kingdom);
+		} else
 		if (type == PayloadType.START) {
 			StartPayload payload = this.daemon.gson.fromJson(request.get(1), StartPayload.class);
 			int port = this.daemon.getFreePort();
@@ -116,7 +126,9 @@ public class ConnectionHandler extends Thread implements Runnable {
 			}
 		} else 
 		if (type == PayloadType.STOP) {
-			//StopPayload payload = this.daemon.gson.fromJson(request.get(1), StopPayload.class);
+			StopPayload payload = this.daemon.gson.fromJson(request.get(1), StopPayload.class);
+			this.daemon.getServer(this.daemon.getKingdom(payload.kingdomName)).setState(ServerState.SHUTDOWN);
+			//TODO: Remove from database of active servers if needed.
 		} else
 		if (type == PayloadType.KINGDOM_DATA) {
 			KingdomDataPayload payload = this.daemon.gson.fromJson(request.get(1), KingdomDataPayload.class);
@@ -137,6 +149,22 @@ public class ConnectionHandler extends Thread implements Runnable {
 			} else {
 				this.response = "null";
 			}
+		} else
+		if (type == PayloadType.ADDON) {
+			AddonPayload payload = this.daemon.gson.fromJson(request.get(1), AddonPayload.class);
+			if (payload.addonPayloadType == AddonPayloadType.INSTALL) {
+				FileUtil.installAddon(payload.kingdom, payload.addon);
+			} else
+			if (payload.addonPayloadType == AddonPayloadType.REMOVE) {
+				FileUtil.removeAddon(payload.kingdom, payload.addon);
+			} else
+			if (payload.addonPayloadType == AddonPayloadType.UPDATE) {
+				FileUtil.removeAddon(payload.kingdom, payload.addon);
+				FileUtil.installAddon(payload.kingdom, payload.addon);
+			}
+		} else
+		if (type == PayloadType.ADDON_LIST) {
+			this.response = this.daemon.gson.toJson(this.daemon.getAddons());
 		}
 		
 //		System.out.println("FOUND PAYLOAD TYPE: " + type);

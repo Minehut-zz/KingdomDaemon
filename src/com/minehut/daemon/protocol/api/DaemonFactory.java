@@ -8,10 +8,16 @@ import java.net.UnknownHostException;
 import java.util.List;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.minehut.daemon.Kingdom;
 import com.minehut.daemon.SampleKingdom;
 import com.minehut.daemon.protocol.Payload;
+import com.minehut.daemon.protocol.addon.Addon;
+import com.minehut.daemon.protocol.addon.AddonListPayload;
+import com.minehut.daemon.protocol.addon.AddonPayload;
+import com.minehut.daemon.protocol.addon.AddonPayloadType;
 import com.minehut.daemon.protocol.create.CreatePayload;
+import com.minehut.daemon.protocol.reset.ResetPayload;
 import com.minehut.daemon.protocol.start.StartPayload;
 import com.minehut.daemon.protocol.status.KingdomDataPayload;
 import com.minehut.daemon.protocol.status.KingdomDataPayload.KingdomDataType;
@@ -20,6 +26,7 @@ import com.minehut.daemon.protocol.status.PlayerKingdomsListPayload;
 import com.minehut.daemon.protocol.status.SampleKingdomListPayload;
 import com.minehut.daemon.protocol.status.out.StatusPlayerKingdomsList;
 import com.minehut.daemon.protocol.status.out.StatusSampleList;
+import com.minehut.daemon.protocol.stop.StopPayload;
 import com.minehut.daemon.tools.mc.MCPlayer;
 
 public class DaemonFactory {
@@ -113,6 +120,31 @@ public class DaemonFactory {
 	public void startKingdom(Kingdom kingdom) {
 		StartPayload payload = new StartPayload(kingdom);
 		this.writeToSocket(payload);
+	}
+	
+	public void resetKingdom(Kingdom kingdom) {
+		this.writeToSocket(new ResetPayload(kingdom));
+	}
+	
+	public void stopKingdom(String kingdomName) {
+		this.writeToSocket(new StopPayload(kingdomName));
+	}
+	
+	public void updateAddon(Kingdom kingdom, Addon addon) {
+		this.writeToSocket(new AddonPayload(kingdom, addon, AddonPayloadType.UPDATE));
+	}
+	
+	public void removeAddon(Kingdom kingdom, Addon addon) {
+		this.writeToSocket(new AddonPayload(kingdom, addon, AddonPayloadType.REMOVE));
+	}
+	
+	public void installAddon(Kingdom kingdom, Addon addon) {
+		this.writeToSocket(new AddonPayload(kingdom, addon, AddonPayloadType.INSTALL));
+	}
+	
+	public List<Addon> getSampleAddonList() {
+		String response = this.writeToSocket(new AddonListPayload());
+		return this.gson.fromJson(response, new TypeToken<List<Addon>>(){}.getType());
 	}
 	
 //	public class
