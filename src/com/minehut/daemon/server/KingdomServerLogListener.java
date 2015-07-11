@@ -8,9 +8,11 @@ public class KingdomServerLogListener extends TailerListenerAdapter {
 	
 	private KingdomServer server;
 	private long previousListSendTime = 0L;
+	public long lastReadTime;
 	
 	public KingdomServerLogListener(KingdomServer server) {
 		this.server = server;
+		lastReadTime = System.currentTimeMillis();
 	}
 	
 	@Override
@@ -43,7 +45,10 @@ public class KingdomServerLogListener extends TailerListenerAdapter {
 				}
 			}
 		}
-		if (line.contains(" INFO]: Stopping server")) {
+
+		this.lastReadTime = System.currentTimeMillis();
+
+		if (line.contains("INFO]: Stopping server")) {
 			server.setState(ServerState.SHUTDOWN);
 			System.out.println(line);
 		} else if (line.contains(" INFO]: Done (")) {
@@ -57,5 +62,9 @@ public class KingdomServerLogListener extends TailerListenerAdapter {
 			server.startup = startupArray[1];
 			System.out.println("Updated Startup Status: " + startupArray[1]);
 		}
+	}
+
+	public long getLastReadTime() {
+		return lastReadTime;
 	}
 }

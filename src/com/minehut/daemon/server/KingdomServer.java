@@ -23,7 +23,8 @@ public class KingdomServer extends Thread {
 	private Tailer tailer;
 	private Thread tailerThread;
 	private File log;
-	
+
+	private KingdomServerLogListener tailerListener;
 	
 	public boolean old = false;
 
@@ -114,11 +115,16 @@ public class KingdomServer extends Thread {
 
 				if (!this.tailerStarted) {
 					this.tailerStarted = true;
-					TailerListener listener = new KingdomServerLogListener(this);
-					tailer = new Tailer(log, listener);
+					this.tailerListener = new KingdomServerLogListener(this);
+					tailer = new Tailer(log, tailerListener);
 					tailerThread = new Thread(tailer);
 					tailerThread.start();
 					System.out.println("Starting TailerThread, hopefully at a delay.");
+				}
+
+				if ((this.tailerListener.getLastReadTime() - System.currentTimeMillis()) / 1000 >= 5) {
+					System.out.println("Server hasn't responded for 5 seconds, executing force shutdown");
+					this.setState(ServerState.SHUTDOWN);
 				}
 
 		    	if (((System.currentTimeMillis() - this.lastTick) / 1000) >= 10) {
