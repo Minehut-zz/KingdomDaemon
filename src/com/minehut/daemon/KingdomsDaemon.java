@@ -52,6 +52,24 @@ public class KingdomsDaemon extends Thread implements Runnable {
 	private DBCollection serversCollection;
 	
 	public KingdomsDaemon() {
+		
+		Runtime.getRuntime().addShutdownHook(new Thread() {
+			@Override
+			public void run() {
+				System.out.println("Shutdown event caught");
+				try {
+					//Runtime.getRuntime().exec("screen -ls | grep detached | cut -d. -f1 | awk '{print $1}' | xargs kill");
+					for (KingdomServer server : KingdomsDaemon.getInstance().servers) {
+						server.shutdown(true);
+					}
+					
+					//new ProcessBuilder("/bin/bash", "-c", "screen -ls | grep detached | cut -d. -f1 | awk '{print $1}' | xargs kill").start();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+		
 		instance = this;
 
 		this.utils = new Utils();
@@ -69,7 +87,7 @@ public class KingdomsDaemon extends Thread implements Runnable {
 
 		//this.statusManager = new StatusManager();
 	}
-
+	
 	private void connect() {
 		try {
 			this.mongo = new MongoClient("localhost", 27017);

@@ -125,12 +125,7 @@ public class KingdomServer extends Thread {
 		    		if (this.state == ServerState.SHUTDOWN) {
 		    			
 		    			System.out.println("ServerState set to shutdown, shutting down the server!");
-		    			new ProcessBuilder("/bin/bash", "-c", "screen -X -S kingdom" + this.id + " quit").start().waitFor(); //Should kill the screen after the kingdom shuts down
-		   			 	log.delete();
-						KingdomsDaemon.getInstance().getServers().remove(this);
-
-						//int portIndex = KingdomsDaemon.getInstance().getPorts().indexOf(Integer.toString(this.port));
-						KingdomsDaemon.getInstance().getPorts().remove(Integer.toString(this.port));
+		    			this.shutdown(false);
 
 						break;
 		    		}
@@ -175,6 +170,15 @@ public class KingdomServer extends Thread {
 		}
 		
 		
+	}
+	
+	public void shutdown(boolean daemon) throws InterruptedException, IOException {
+		new ProcessBuilder("/bin/bash", "-c", "screen -X -S kingdom" + this.id + " quit").start().waitFor(); //Should kill the screen after the kingdom shuts down
+		log.delete();
+		if (!daemon) {
+			KingdomsDaemon.getInstance().getServers().remove(this);
+			KingdomsDaemon.getInstance().getPorts().remove(Integer.toString(this.port));
+		}
 	}
 	
 	private long previousListSendTime = 0L;
@@ -232,7 +236,7 @@ public class KingdomServer extends Thread {
 	public Process sendScreenCommand(String cmd) {
 		Process process = null;
 		try {
-			process =  new ProcessBuilder("/bin/bash", "-c", "screen -S kingdom" + this.id + " -p 0 -X stuff '" + cmd + "'^M").start();
+			process =  new ProcessBuilder("/bin/bash", "-c", "screen -S kingdom" + this.id + " -p 0 -X stuff '" + cmd + "^M'").start();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
