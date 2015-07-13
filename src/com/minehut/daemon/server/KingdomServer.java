@@ -3,6 +3,8 @@ package com.minehut.daemon.server;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.RandomAccessFile;
+
 import org.apache.commons.io.input.Tailer;
 import org.apache.commons.io.input.TailerListener;
 
@@ -20,11 +22,7 @@ public class KingdomServer extends Thread {
 	
 	public ServerState state;
 	
-	private Tailer tailer;
-	private Thread tailerThread;
 	private File log;
-
-	private KingdomServerLogListener tailerListener;
 	
 	public boolean old = false;
 
@@ -67,7 +65,7 @@ public class KingdomServer extends Thread {
 	}
 	
 	
-	private long lastTick = 0L;
+	private long lastTick = 0L, pointer, lastChecked = 0L;
 	
 	private int tailerDelay = 0;
 	private boolean tailerStarted = false;
@@ -112,46 +110,64 @@ public class KingdomServer extends Thread {
 		    while (true) {
 		    	if (this.lastTick == 0)
 		    		this.lastTick = System.currentTimeMillis();
+		    	if (this.lastChecked == 0)
+		    		this.lastChecked = System.currentTimeMillis();
 
-				if (!this.tailerStarted) {
-					this.tailerStarted = true;
-					this.tailerListener = new KingdomServerLogListener(this);
-					tailer = new Tailer(log, tailerListener);
-					tailerThread = new Thread(tailer);
-					tailerThread.start();
-					System.out.println("Starting TailerThread, hopefully at a delay.");
-				}
 
-				if ((this.tailerListener.getLastReadTime() - System.currentTimeMillis()) / 1000 >= 5) {
+				/*if ((this.tailerListener.getLastReadTime() - System.currentTimeMillis()) / 1000 >= 5) {
 					System.out.println("Server hasn't responded for 5 seconds, executing force shutdown");
 					this.setState(ServerState.SHUTDOWN);
-				}
+				}*/
 
 		    	if (((System.currentTimeMillis() - this.lastTick) / 1000) >= 10) {
 		    		System.out.println("KingdomServer Thread ticking at " + System.currentTimeMillis() + " for kingdom" + this.id);
 		    		
 		    		if (this.state == ServerState.SHUTDOWN) {
-		    			tailerThread.interrupt();
-		    			tailer.stop();
-		    			
 		    			
 		    			System.out.println("ServerState set to shutdown, shutting down the server!");
 		    			new ProcessBuilder("/bin/bash", "-c", "screen -X -S kingdom" + this.id + " quit").start().waitFor(); //Should kill the screen after the kingdom shuts down
 		   			 	log.delete();
 						KingdomsDaemon.getInstance().getServers().remove(this);
 
-						int portIndex = KingdomsDaemon.getInstance().getPorts().indexOf(this.port);
-						KingdomsDaemon.getInstance().getPorts().remove(portIndex);
+						//int portIndex = KingdomsDaemon.getInstance().getPorts().indexOf(Integer.toString(this.port));
+						KingdomsDaemon.getInstance().getPorts().remove(Integer.toString(this.port));
 
 						break;
 		    		}
 		    				    		
 		    		this.lastTick = System.currentTimeMillis();
 		    	}
+		    	
+		    	if ((System.currentTimeMillis() - this.lastChecked) / 1000 >= 1) { //We can change this up to ms/s/minute or whatever we need
+					System.out.println("Trying to read log file at pointer: " + this.pointer);
+					try {
+						RandomAccessFile raf = new RandomAccessFile(log, "r");
+						long length = raf.length();
+						if (length < pointer) {
+							raf = new RandomAccessFile(log, "r");
+							pointer = 0;
+						}
+						if (length > pointer) {
+							System.out.println("New lines found, reading new lines");
+							raf.seek(pointer);
+							String line = raf.readLine();
+			            	while(line != null) {
+			            		this.parseLine(line);
+			              		line = raf.readLine();
+			            	}
+			            	pointer = raf.getFilePointer();
+			            	System.out.println("Pointer set to " + pointer + " file length is " + length);
+						} else {
+							System.out.println("No new lines have been found in the log file.");
+						}
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+					lastChecked = System.currentTimeMillis();
+				}
+		    	
+		    	
 		    }
-		    
-		   
-		    
 			//TODO: upload to mongo about port?
 			//TODO: open input stream to ./logs/latest.log for parsing server logs
 		} catch (IOException | InterruptedException e) {
@@ -159,6 +175,53 @@ public class KingdomServer extends Thread {
 		}
 		
 		
+	}
+	
+	private long previousListSendTime = 0L;
+	public long lastReadTime;
+	
+	public void parseLine(String line) {
+		if (((System.currentTimeMillis() - this.previousListSendTime) / 1000) >= 3) {
+
+			/* Retrieve Player Count */
+			if (line.contains("There are ") && line.contains(" players online:")) {
+
+				String[] firstPart = line.split("There are ");
+				String[] secondPart = firstPart[1].split(" players online:");
+
+				System.out.println("secondPart[0]:\"" + secondPart[0] + "\"");
+				
+				String countString[] = secondPart[0].split("//");
+
+				System.out.println("countString[0]:" + countString[0]);
+				
+				int count = Integer.parseInt(countString[0]);
+				//TODO: countString[1] is the max players
+				this.playerCount = count;
+			} else {
+				if (!line.startsWith(">")) {
+					this.sendScreenCommand("list");
+					this.previousListSendTime = System.currentTimeMillis();
+				}
+			}
+		}
+
+		this.lastReadTime = System.currentTimeMillis();
+
+		if (line.contains("INFO]: Stopping server")) {
+			this.setState(ServerState.SHUTDOWN);
+			System.out.println(line);
+		} else if (line.contains(" INFO]: Done (")) {
+			this.startup = "100%";
+			System.out.println(line);
+		} else if (line.contains("FAILED TO BIND TO PORT!")) {
+			this.setState(ServerState.SHUTDOWN);
+			System.out.println(line);
+		} else if (line.contains("Preparing spawn area: ")) {
+			String[] startupArray = line.split("Preparing spawn area: ");
+			this.startup = startupArray[1];
+			System.out.println("Updated Startup Status: " + startupArray[1]);
+		}
 	}
 	
 	public void setState(ServerState state) {

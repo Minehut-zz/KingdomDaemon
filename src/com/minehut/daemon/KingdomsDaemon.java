@@ -39,11 +39,11 @@ public class KingdomsDaemon extends Thread implements Runnable {
 	
 	private List<KingdomServer> servers;
 	
-	private List<Integer> ports;
+	private List<String> ports;
 
 	private static KingdomsDaemon instance;
 
-	public StatusManager statusManager;
+	//public StatusManager statusManager;
 
 	/* Database */
 	private MongoClient mongo;
@@ -57,7 +57,7 @@ public class KingdomsDaemon extends Thread implements Runnable {
 		this.utils = new Utils();
 		this.gson = new Gson();
 		
-		this.ports = new ArrayList<Integer>();
+		this.ports = new ArrayList<String>();
 		this.servers = new ArrayList<KingdomServer>();
 		this.samples = this.initSampleKingdoms();
 		this.addons = this.initAddons();
@@ -67,7 +67,7 @@ public class KingdomsDaemon extends Thread implements Runnable {
 		this.initDirs();
 		this.initServerSocket();
 
-		this.statusManager = new StatusManager();
+		//this.statusManager = new StatusManager();
 	}
 
 	private void connect() {
@@ -163,7 +163,7 @@ public class KingdomsDaemon extends Thread implements Runnable {
 		for (int i = 1; i < 66; i++) {
 			if (!this.usedPort(i)&&!ports.contains(i)) {
 				port = defaultPort + i;
-				ports.add(i);
+				ports.add(Integer.toString(i));
 				break;
 			}
 		}
@@ -402,15 +402,15 @@ public class KingdomsDaemon extends Thread implements Runnable {
 		return serversCollection;
 	}
 
-	public StatusManager getStatusManager() {
+	/*public StatusManager getStatusManager() {
 		return statusManager;
-	}
+	}*/
 
 	public List<KingdomServer> getServers() {
 		return servers;
 	}
 
-	public List<Integer> getPorts() {
+	public List<String> getPorts() {
 		return ports;
 	}
 }
