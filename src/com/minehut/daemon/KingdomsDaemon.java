@@ -13,7 +13,6 @@ import java.util.List;
 import com.google.gson.Gson;
 import com.minehut.daemon.protocol.addon.Addon;
 import com.minehut.daemon.server.KingdomServer;
-import com.minehut.daemon.status.StatusManager;
 import com.minehut.daemon.tools.LogType;
 import com.minehut.daemon.tools.Utils;
 import com.minehut.daemon.tools.mc.MCPlayer;
@@ -24,8 +23,6 @@ public class KingdomsDaemon extends Thread implements Runnable {
 	private int port = 10420;
 	
 	public static int defaultPort = 40000;
-	
-	private String homeDir = ".";
 	
 	private ServerSocket serverSocket;
 	
@@ -56,14 +53,10 @@ public class KingdomsDaemon extends Thread implements Runnable {
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			@Override
 			public void run() {
-				System.out.println("Shutdown event caught");
 				try {
-					//Runtime.getRuntime().exec("screen -ls | grep detached | cut -d. -f1 | awk '{print $1}' | xargs kill");
 					for (KingdomServer server : KingdomsDaemon.getInstance().servers) {
 						server.shutdown(true);
 					}
-					
-					//new ProcessBuilder("/bin/bash", "-c", "screen -ls | grep detached | cut -d. -f1 | awk '{print $1}' | xargs kill").start();
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -380,13 +373,10 @@ public class KingdomsDaemon extends Thread implements Runnable {
 		sock = this.serverSocket.accept();
 		
 		if (sock!=null) {
-			//TODO: Parse socket connection
 			this.utils.logLine(LogType.DEBUG, sock.toString());
 			
 			ConnectionHandler connectionHandler = new ConnectionHandler(this, sock);
 			connectionHandler.start();
-			
-			//sock.close();
 		}
 	}
 	

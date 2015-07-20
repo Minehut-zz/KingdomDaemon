@@ -38,6 +38,10 @@ public class Kingdom {
 		this.initPlayerFolder();
 	}
 	
+	public void setSampleKingdom(SampleKingdom sample) {
+		this.sampleBase = sample;
+	}
+	
 	public void removeAddon(Addon addon) {
 		this.addonList.remove(addon);
 	}

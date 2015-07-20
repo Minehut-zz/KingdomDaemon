@@ -63,12 +63,35 @@ public class FileUtil {
     
     public static void resetKingdom(Kingdom kingdom) {
     	File home = new File(kingdom.getHomeDir());
-    	home.delete();
+    	System.out.println("Resetting Kingdom Files " + kingdom.getHomeDir());
+    	File[] kingdomFiles = home.listFiles();
+    	if(kingdomFiles!=null) {
+    		for (File file : kingdomFiles) {
+    			deleteFiles(file);
+    		}
+    	}
     	installKingdom(kingdom);
     }
     
+    private static void deleteFiles(File file) {
+    	System.out.println("Removing " + file.getPath());
+    	if (file.getName().contains("screenlog")) {
+    		System.out.println("SCREEN LOG FOUND, SKIPPING");
+    		return;
+    	}
+    	if (file.isDirectory()) {
+    		File[] files = file.listFiles();
+    		if (files!=null) {
+    			for (File f : files) {
+    				deleteFiles(f);
+    			}
+    		}
+    	}
+    	file.delete();
+    }
+    
     public static void installKingdom(Kingdom kingdom) {
-    	if (!kingdom.isInstalled()) {
+    	//if (!kingdom.isInstalled()) {
     		File home = new File(kingdom.getHomeDir());
     		if (!home.exists())
     			home.mkdir();
@@ -77,7 +100,7 @@ public class FileUtil {
     		System.out.println(sampleDir.toString());
     		copyFile(sampleDir, home);
     		
-    	}
+    	//}
     }
     
     public static void saveKingdom(Kingdom kingdom) {

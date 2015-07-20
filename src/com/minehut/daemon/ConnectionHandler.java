@@ -24,7 +24,6 @@ import com.minehut.daemon.server.KingdomServer;
 import com.minehut.daemon.server.KingdomServer.ServerState;
 import com.minehut.daemon.tools.FileUtil;
 import com.minehut.daemon.tools.LogType;
-import com.mongodb.*;
 
 public class ConnectionHandler extends Thread implements Runnable {
 
@@ -37,7 +36,7 @@ public class ConnectionHandler extends Thread implements Runnable {
 	
 	private Socket sock;
 	
-	private String response;
+	private String response = "NULL";
 	
 	public ConnectionHandler(KingdomsDaemon daemon, Socket sock) {
 		this.daemon = daemon;
@@ -55,7 +54,6 @@ public class ConnectionHandler extends Thread implements Runnable {
 				if (line == null)
 					return;
 				
-				
 				ArrayList<String> requestLines = new ArrayList<String>(Arrays.asList(line.split("\n")));
 				
 				if (requestLines.size()==0 || requestLines.get(0).equals("")) {
@@ -64,26 +62,23 @@ public class ConnectionHandler extends Thread implements Runnable {
 					return;
 				}
 				
-				for (String l : requestLines) {
-//					this.daemon.getUtils().logLine(LogType.INFO, l);
-				}
-				
 				this.parseRequest(requestLines);
-				
 				this.objectOutputStream.writeObject(this.response);
-				
+				System.out.println("out response: " + this.response);
+				System.out.println();
 			} catch (Exception e) {
 				e.printStackTrace();
 				this.finish();
 			}
-		
 			this.finish();
 		}
 	}
 	
 	private void parseRequest(ArrayList<String> request) {
 		PayloadType type = PayloadType.valueOf(request.get(0));
-		
+		System.out.println(request.get(0));
+		System.out.println(request.get(1));
+		System.out.println();
 		if (type == PayloadType.PLAYER_KINGDOMS_LIST) {
 			PlayerKingdomsListPayload payload = this.daemon.gson.fromJson(request.get(1), PlayerKingdomsListPayload.class);
 			

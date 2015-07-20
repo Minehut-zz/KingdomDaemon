@@ -36,42 +36,25 @@ public class DaemonFactory {
 	
 	private Gson gson;
 	
-	private Socket sock;
-	
 	public DaemonFactory(String host, int port) {
 		this.gson = new Gson();
 		this.daemonHost = host;
 		this.daemonPort = port;
 	}
 	
-	private boolean openSocket() {
-		try {
-			this.sock = new Socket(this.daemonHost, this.daemonPort);
-			return true;
-		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return false;
-	}
-	
-	private boolean closeSocket() {
-		try {
-			this.sock.close();
-			return true;
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return false;
-	}
-	
 	private String writeToSocket(Payload payload) {
+		Socket sock = null;
+		boolean open = false;
+		try {
+			sock = new Socket(this.daemonHost, this.daemonPort);
+			open = true;
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		String message = "null";
-		if (this.openSocket()) {
+		if (open) {
 			try {
 				ObjectOutputStream objectOutputStream = new ObjectOutputStream(sock.getOutputStream());
 				objectOutputStream.writeObject(payload.getPayloadType().toString() + "\n" + this.gson.toJson(payload));
@@ -82,8 +65,15 @@ public class DaemonFactory {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			this.closeSocket();
+			try {
+				if (sock!=null)
+					sock.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
+		System.out.println("Found message from writeToSocket: " + message);
+		System.out.println();
 		return message;
 	}
 	
@@ -100,6 +90,28 @@ public class DaemonFactory {
 		PlayerKingdomsListPayload statusPayload = new PlayerKingdomsListPayload(player);
 		String response = this.writeToSocket(statusPayload);
 		return this.gson.fromJson(response, StatusPlayerKingdomsList.class);
+	}
+	
+	public SampleKingdom getSampleKingdom(String sampleType) {
+		for (SampleKingdom sk : this.getSampleKingdoms()) {
+			if (sk.getType().equalsIgnoreCase(sampleType)) {
+				return sk;
+			}
+		}
+		return null; //Should never happen, always call isSampleKingdom(String.class); first
+	}
+	
+	public boolean isSampleKingdom(String sampleType) {
+		for (SampleKingdom sk : this.getSampleKingdoms()) {
+			if (sk.getType().equalsIgnoreCase(sampleType)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public List<SampleKingdom> getSampleKingdoms() {
+		return this.getStatusSampleList().sampleList;
 	}
 	
 	public StatusSampleList getStatusSampleList() {
@@ -152,7 +164,8 @@ public class DaemonFactory {
 	public boolean isKingdom(String name) {
 		KingdomPayload payload = new KingdomPayload(name);
 		String response = this.writeToSocket(payload);
-		return !(response.equals("null"));
+		System.out.println("returning " + (!response.equalsIgnoreCase("null")) + " for isKingdom(String.class)");
+		return !response.equalsIgnoreCase("null");
 	}
 	
 	public Kingdom getKingdom(String name) {
