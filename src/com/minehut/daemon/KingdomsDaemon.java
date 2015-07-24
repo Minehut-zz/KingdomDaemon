@@ -13,6 +13,7 @@ import java.util.List;
 import com.google.gson.Gson;
 import com.minehut.daemon.protocol.addon.Addon;
 import com.minehut.daemon.server.KingdomServer;
+import com.minehut.daemon.status.StatusManager;
 import com.minehut.daemon.tools.LogType;
 import com.minehut.daemon.tools.Utils;
 import com.minehut.daemon.tools.mc.MCPlayer;
@@ -40,7 +41,7 @@ public class KingdomsDaemon extends Thread implements Runnable {
 
 	private static KingdomsDaemon instance;
 
-	//public StatusManager statusManager;
+	public StatusManager statusManager;
 
 	/* Database */
 	private MongoClient mongo;
@@ -78,7 +79,7 @@ public class KingdomsDaemon extends Thread implements Runnable {
 		this.initDirs();
 		this.initServerSocket();
 
-		//this.statusManager = new StatusManager();
+		this.statusManager = new StatusManager();
 	}
 	
 	private void connect() {
