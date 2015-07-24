@@ -66,7 +66,8 @@ public class StatusManager {
             obj.put("bungee", bungee);
             obj.put("motd", motd);
             obj.put("rank", kingdom.rank);
-
+            obj.put("featured", kingdom.featured);
+            
             try {
                 obj.put("ip", InetAddress.getLocalHost().toString());
             } catch (UnknownHostException e) {

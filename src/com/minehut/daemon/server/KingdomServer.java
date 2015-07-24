@@ -75,13 +75,10 @@ public class KingdomServer extends Thread {
 
 			log = new File("/home/rdillender/daemon/kingdoms/" + this.kingdom.getOwner().playerUUID + "/kingdom" + this.kingdom.id + "/screenlog.0");
 			
-			ProcessBuilder pb = new ProcessBuilder("/bin/bash", "-c", "screen -dmLS kingdom" + this.id);
+			ProcessBuilder pb = new ProcessBuilder("/bin/bash", "-c", "screen -dmLS kingdom" + this.id + " bash -c 'java -XX:MaxPermSize=128M -Xmx768M -Xms768M -jar spigot.jar nogui'");
 			pb.directory(new File("/home/rdillender/daemon/kingdoms/" + this.kingdom.getOwner().playerUUID + "/kingdom" + this.kingdom.id));
 			pb.start().waitFor();
-			
-			this.sendScreenCommand("java -XX:MaxPermSize=128M -Xmx768M -Xms768M -jar spigot.jar nogui").waitFor();
-
-			this.setState(ServerState.RUNNING);
+			//this.setState(ServerState.STARTING);
 			
 			FileWriter writer = new FileWriter(log);
 			writer.write("STARTING KINGDOM - (KINGDOM DAEMON v4.2.0)\n");
@@ -95,7 +92,7 @@ public class KingdomServer extends Thread {
 		    		this.lastChecked = System.currentTimeMillis();
 		    	if (((System.currentTimeMillis() - this.lastTick) / 1000) >= 10) {
 		    		//System.out.println("KingdomServer Thread ticking at " + System.currentTimeMillis() + " for kingdom" + this.id);
-		    		if (this.emptyTick >= 6) { //After 6 * (10 seconds) checks with no players online the server will shutdown
+		    		if (this.emptyTick >= 9) { //After 6 * (10 seconds) checks with no players online the server will shutdown
 			    		if (this.state!=ServerState.SHUTDOWN) {
 			    			this.setState(ServerState.SHUTDOWN);
 			    		}
@@ -104,7 +101,7 @@ public class KingdomServer extends Thread {
 		    			this.shutdown(false);
 						break;
 		    		}
-		    		if (this.playerCount<=0) {
+		    		if (this.playerCount<=0 && this.state == ServerState.RUNNING) {
 						emptyTick++; //If no players are online tick this up by 1 until it hits 6
 					} else {
 						emptyTick=0;//Reset if the count is not less than or 0
@@ -147,7 +144,7 @@ public class KingdomServer extends Thread {
 		log.delete();
 		if (!daemon) {
 			KingdomsDaemon.getInstance().getServers().remove(this);
-			KingdomsDaemon.getInstance().getPorts().remove(Integer.toString(this.port));
+			KingdomsDaemon.getInstance().getPorts().remove(Integer.toString(this.id));
 		}
 	}
 	
@@ -155,12 +152,12 @@ public class KingdomServer extends Thread {
 	public long lastReadTime;
 	
 	public void parseLine(String line) {
-		if (((System.currentTimeMillis() - this.previousListSendTime) / 1000) >= 3) {
+		if (((System.currentTimeMillis() - this.previousListSendTime) / 1000) >= 3 && this.state == ServerState.RUNNING) {
 			/* Retrieve Player Count */
 			if (line.contains("There are ") && line.contains(" players online:")) {
 				String[] firstPart = line.split("There are ");
 				String[] secondPart = firstPart[1].split(" players online:");
-				String countString[] = secondPart[0].split("//");
+				String countString[] = secondPart[0].split("/");
 				int count = Integer.parseInt(countString[0]);
 				//TODO: countString[1] is the max players
 				this.playerCount = count;
@@ -178,6 +175,7 @@ public class KingdomServer extends Thread {
 			System.out.println(line);
 		} else if (line.contains(" INFO]: Done (")) {
 			this.startup = "100%";
+			this.setState(ServerState.RUNNING);
 			System.out.println(line);
 		} else if (line.contains("FAILED TO BIND TO PORT!")) {
 			this.setState(ServerState.SHUTDOWN);

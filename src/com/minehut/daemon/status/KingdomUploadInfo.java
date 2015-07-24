@@ -16,7 +16,7 @@ public class KingdomUploadInfo {
     int playersOnline;
     int maxPlayers;
     long lastOnline;
-
+    public boolean featured = false;
     public KingdomUploadInfo(String name, String motd, String rank, int port, int playersOnline, int maxPlayers) {
         this.name = name;
         this.motd = motd;

@@ -14,7 +14,7 @@ public class Kingdom {
 	public int id = 0;
 	
 	private SampleKingdom sampleBase;
-	
+	public boolean featured = false;
 	private String homeDir, playerFolder, name;
 	
 	private List<Addon> addonList = new ArrayList<Addon>();
