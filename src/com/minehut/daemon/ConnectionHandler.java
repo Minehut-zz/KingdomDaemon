@@ -11,6 +11,7 @@ import com.minehut.daemon.protocol.PayloadType;
 import com.minehut.daemon.protocol.addon.AddonPayload;
 import com.minehut.daemon.protocol.addon.AddonPayloadType;
 import com.minehut.daemon.protocol.create.CreatePayload;
+import com.minehut.daemon.protocol.rename.RenamePayload;
 import com.minehut.daemon.protocol.reset.ResetPayload;
 import com.minehut.daemon.protocol.start.StartPayload;
 import com.minehut.daemon.protocol.status.KingdomDataPayload;
@@ -76,26 +77,22 @@ public class ConnectionHandler extends Thread implements Runnable {
 	
 	private void parseRequest(ArrayList<String> request) {
 		PayloadType type = PayloadType.valueOf(request.get(0));
-		System.out.println(request.get(0));
-		System.out.println(request.get(1));
-		System.out.println();
+		//System.out.println(request.get(0));
+		//System.out.println(request.get(1));
+		//System.out.println();
 		if (type == PayloadType.PLAYER_KINGDOMS_LIST) {
 			PlayerKingdomsListPayload payload = this.daemon.gson.fromJson(request.get(1), PlayerKingdomsListPayload.class);
-			
-				StatusPlayerKingdomsList out = new StatusPlayerKingdomsList();
-				
-				if (this.daemon.hasKingdom(payload.player.playerUUID)) {
-					out.setHasKingdom(true);
-					out.setPlayerKingdomsList(this.daemon.getPlayerKingdoms(payload.player));
-				} else {
-					out.setHasKingdom(false);
-				}
-				this.response = this.daemon.gson.toJson(out);
-//			System.out.println("Status payload: " + payload);
+			StatusPlayerKingdomsList out = new StatusPlayerKingdomsList();
+			if (this.daemon.hasKingdom(payload.player.playerUUID)) {
+				out.setHasKingdom(true);
+				out.setPlayerKingdomsList(this.daemon.getPlayerKingdoms(payload.player));
+			} else {
+				out.setHasKingdom(false);
+			}
+			this.response = this.daemon.gson.toJson(out);
 		} else 
 		if (type == PayloadType.SAMPLE_KINGDOMS_LIST) {
 			this.response = this.daemon.gson.toJson(new StatusSampleList().setSampleList(this.daemon.getSampleKingdoms()));
-			
 		} else
 		if (type == PayloadType.CREATE) {
 			CreatePayload payload = this.daemon.gson.fromJson(request.get(1), CreatePayload.class);
@@ -108,6 +105,13 @@ public class ConnectionHandler extends Thread implements Runnable {
 			ResetPayload payload = this.daemon.gson.fromJson(request.get(1), ResetPayload.class);
 			FileUtil.resetKingdom(payload.kingdom);
 			this.daemon.insertKingdomInDatabase(payload.kingdom);
+		} else
+		if (type == PayloadType.RENAME) {
+			RenamePayload payload = this.daemon.gson.fromJson(request.get(1), RenamePayload.class);
+			Kingdom kd = this.daemon.getKingdom(payload.getOldName());
+			kd.setName(payload.getNewName());
+			FileUtil.renameKingdom(kd);
+			this.daemon.changeKingdomNameInDatabase(payload.getOldName(), kd);
 		} else
 		if (type == PayloadType.START) {
 			StartPayload payload = this.daemon.gson.fromJson(request.get(1), StartPayload.class);

@@ -27,6 +27,8 @@ public class KingdomServer extends Thread {
 	public String motd = ""; //todo
 	public int maxPlayers = 10; //todo
 	
+	private int emptyTick = 0;
+	
 	public enum ServerState {
 		SHUTDOWN("SHUTDOWN"), RUNNING("RUNNING"), STARTING("STARTING"), CRASHED("CRASHED");
 		private String theState;
@@ -92,11 +94,21 @@ public class KingdomServer extends Thread {
 		    	if (this.lastChecked == 0)
 		    		this.lastChecked = System.currentTimeMillis();
 		    	if (((System.currentTimeMillis() - this.lastTick) / 1000) >= 10) {
-		    		System.out.println("KingdomServer Thread ticking at " + System.currentTimeMillis() + " for kingdom" + this.id);
+		    		//System.out.println("KingdomServer Thread ticking at " + System.currentTimeMillis() + " for kingdom" + this.id);
+		    		if (this.emptyTick >= 6) { //After 6 * (10 seconds) checks with no players online the server will shutdown
+			    		if (this.state!=ServerState.SHUTDOWN) {
+			    			this.setState(ServerState.SHUTDOWN);
+			    		}
+			    	}
 		    		if (this.state == ServerState.SHUTDOWN) {
 		    			this.shutdown(false);
 						break;
-		    		}    		
+		    		}
+		    		if (this.playerCount<=0) {
+						emptyTick++; //If no players are online tick this up by 1 until it hits 6
+					} else {
+						emptyTick=0;//Reset if the count is not less than or 0
+					}
 		    		this.lastTick = System.currentTimeMillis();
 		    	}
 		    	
@@ -152,6 +164,7 @@ public class KingdomServer extends Thread {
 				int count = Integer.parseInt(countString[0]);
 				//TODO: countString[1] is the max players
 				this.playerCount = count;
+				
 			} else {
 				if (!line.startsWith(">")) {
 					this.sendScreenCommand("list");
@@ -178,7 +191,7 @@ public class KingdomServer extends Thread {
 	
 	public void setState(ServerState state) {
 		this.state = state;
-		System.out.println("kingdom" + this.id + " state set to " + state.getState());
+		//System.out.println("kingdom" + this.id + " state set to " + state.getState());
 	}
 	
 	public Process sendScreenCommand(String cmd) {

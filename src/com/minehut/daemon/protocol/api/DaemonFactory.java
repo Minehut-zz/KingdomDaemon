@@ -17,6 +17,7 @@ import com.minehut.daemon.protocol.addon.AddonListPayload;
 import com.minehut.daemon.protocol.addon.AddonPayload;
 import com.minehut.daemon.protocol.addon.AddonPayloadType;
 import com.minehut.daemon.protocol.create.CreatePayload;
+import com.minehut.daemon.protocol.rename.RenamePayload;
 import com.minehut.daemon.protocol.reset.ResetPayload;
 import com.minehut.daemon.protocol.start.StartPayload;
 import com.minehut.daemon.protocol.status.KingdomDataPayload;
@@ -123,6 +124,10 @@ public class DaemonFactory {
 	public void createKingdom(MCPlayer player, SampleKingdom sample, String name) {
 		CreatePayload payload = new CreatePayload(player, sample, name);
 		this.writeToSocket(payload);
+	}
+	
+	public void renameKingdom(String oldName, String newName) {
+		this.writeToSocket(new RenamePayload(oldName, newName));
 	}
 	
 	public void createKingdom(MCPlayer player, SampleKingdom sample) {

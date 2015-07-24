@@ -103,6 +103,10 @@ public class FileUtil {
     	//}
     }
     
+    public static void renameKingdom(Kingdom kingdom) {
+    	saveKingdom(kingdom);//Should just override the data.json
+    }
+    
     public static void saveKingdom(Kingdom kingdom) {
     	FileWriter writer = null;
     	try {
