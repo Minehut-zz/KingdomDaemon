@@ -41,7 +41,7 @@ public class StatusManager {
             if (!localUploadInfos.isEmpty()) {
                 for (KingdomUploadInfo kingdom : localUploadInfos) {
 
-                    DBObject query = new BasicDBObject("name", "k_" + kingdom.getName());
+                    DBObject query = new BasicDBObject("name", "kingdom" + kingdom.getName());
                     DBObject found = KingdomsDaemon.getInstance().getServersCollection().findOne(query);
 
                     if (found == null) {
@@ -60,7 +60,7 @@ public class StatusManager {
             String bungee = "k" + (kingdom.port - 40000);
             String motd = ""; //todo: get MOTD
 
-            DBObject obj = new BasicDBObject("name", "k_" + kingdom.getName());
+            DBObject obj = new BasicDBObject("name", "kingdom" + kingdom.getName());
             obj.put("kingdomName", kingdom.getName());
             obj.put("type", "kingdom");
             obj.put("bungee", bungee);
