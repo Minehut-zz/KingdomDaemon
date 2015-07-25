@@ -180,12 +180,8 @@ public class DaemonFactory {
 		return this.getKingdomData(kingdom, KingdomDataType.STARTUP);
 	}
 	
-	public void setKingdomMOTD(String kingdomName, String motd) {
-		this.writeToSocket(new ModifyMOTDPayload(kingdomName, motd));
-	}
-	
 	public void setKingdomMOTD(Kingdom kingdom, String motd) {
-		this.setKingdomMOTD(kingdom.getName(), motd);
+		this.writeToSocket(new ModifyMOTDPayload(kingdom, motd));
 	}
 	
 	public String getKingdomMOTD(Kingdom kingdom) {

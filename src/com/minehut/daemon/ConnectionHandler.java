@@ -11,6 +11,7 @@ import com.minehut.daemon.protocol.PayloadType;
 import com.minehut.daemon.protocol.addon.AddonPayload;
 import com.minehut.daemon.protocol.addon.AddonPayloadType;
 import com.minehut.daemon.protocol.create.CreatePayload;
+import com.minehut.daemon.protocol.motd.ModifyMOTDPayload;
 import com.minehut.daemon.protocol.rename.RenamePayload;
 import com.minehut.daemon.protocol.reset.ResetPayload;
 import com.minehut.daemon.protocol.start.StartPayload;
@@ -65,6 +66,7 @@ public class ConnectionHandler extends Thread implements Runnable {
 				
 				this.parseRequest(requestLines);
 				this.objectOutputStream.writeObject(this.response);
+				this.finish();
 			} catch (Exception e) {
 				e.printStackTrace();
 				this.finish();
@@ -135,6 +137,10 @@ public class ConnectionHandler extends Thread implements Runnable {
 				this.response = FileUtil.getKingdomMOTD(payload.kingdom);
 			}
 		} else
+		if (type == PayloadType.MODIFY_MOTD) {
+			ModifyMOTDPayload payload = this.daemon.gson.fromJson(request.get(1), ModifyMOTDPayload.class);
+			FileUtil.editKingdomMOTD(payload.getKingdom(), payload.getMOTD());
+		}
 		if (type == PayloadType.KINGDOM) {
 			KingdomPayload payload = this.daemon.gson.fromJson(request.get(1), KingdomPayload.class);
 			if (this.daemon.isKingdom(payload.kingdomName)) {

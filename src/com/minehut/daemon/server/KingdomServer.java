@@ -45,6 +45,7 @@ public class KingdomServer extends Thread {
 		this.kingdom = kingdom;
 		this.id = id - KingdomsDaemon.defaultPort;
 		this.port = id;
+		init();
 	}
 	
 	public KingdomServer(Kingdom kingdom, int id, boolean old) {
@@ -52,6 +53,11 @@ public class KingdomServer extends Thread {
 		this.id = id - KingdomsDaemon.defaultPort;
 		this.port = id;
 		this.old = old;
+		init();
+	}
+	
+	private void init() {
+		this.motd = FileUtil.getKingdomMOTD(this.kingdom);
 	}
 	
 	public int getID() {

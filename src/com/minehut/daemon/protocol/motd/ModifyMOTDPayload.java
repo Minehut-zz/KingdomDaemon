@@ -1,20 +1,22 @@
 package com.minehut.daemon.protocol.motd;
 
+import com.minehut.daemon.Kingdom;
 import com.minehut.daemon.protocol.Payload;
 import com.minehut.daemon.protocol.PayloadType;
 
 public class ModifyMOTDPayload extends Payload {
 
-	private String kingdomName, MOTD;
+	private Kingdom kingdom;
+	private String MOTD;
 	
-	public ModifyMOTDPayload(String kingdomName, String MOTD) {
+	public ModifyMOTDPayload(Kingdom kingdom, String MOTD) {
 		super(PayloadType.MODIFY_MOTD);
-		this.kingdomName = kingdomName;
+		this.kingdom = kingdom;
 		this.MOTD = MOTD;
 	}
 	
-	public String getKingdomName() {
-		return this.kingdomName;
+	public Kingdom getKingdom() {
+		return this.kingdom;
 	}
 	
 	public String getMOTD() {
