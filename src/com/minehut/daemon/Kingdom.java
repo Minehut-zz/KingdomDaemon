@@ -47,7 +47,6 @@ public class Kingdom {
 	}
 	
 	public void addAddon(Addon addon) {
-		System.out.println(addon.name);
 		this.addonList.add(addon);
 	}
 	

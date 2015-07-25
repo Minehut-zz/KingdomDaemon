@@ -1,20 +1,12 @@
 package com.minehut.daemon.test;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.RandomAccessFile;
-import java.util.Arrays;
 import java.util.List;
 
-import org.apache.commons.io.input.Tailer;
 import org.apache.commons.io.input.TailerListenerAdapter;
 
-import com.google.gson.Gson;
 import com.minehut.daemon.Kingdom;
 import com.minehut.daemon.SampleKingdom;
-import com.minehut.daemon.protocol.addon.Addon;
 import com.minehut.daemon.protocol.api.DaemonFactory;
-import com.minehut.daemon.server.KingdomServerLogListener;
 import com.minehut.daemon.tools.mc.MCPlayer;
 
 public class Start {

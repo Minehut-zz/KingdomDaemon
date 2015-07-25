@@ -17,6 +17,7 @@ import com.minehut.daemon.protocol.addon.AddonListPayload;
 import com.minehut.daemon.protocol.addon.AddonPayload;
 import com.minehut.daemon.protocol.addon.AddonPayloadType;
 import com.minehut.daemon.protocol.create.CreatePayload;
+import com.minehut.daemon.protocol.motd.ModifyMOTDPayload;
 import com.minehut.daemon.protocol.rename.RenamePayload;
 import com.minehut.daemon.protocol.reset.ResetPayload;
 import com.minehut.daemon.protocol.start.StartPayload;
@@ -73,8 +74,6 @@ public class DaemonFactory {
 				e.printStackTrace();
 			}
 		}
-		System.out.println("Found message from writeToSocket: " + message);
-		System.out.println();
 		return message;
 	}
 	
@@ -110,6 +109,7 @@ public class DaemonFactory {
 		}
 		return false;
 	}
+	
 	
 	public List<SampleKingdom> getSampleKingdoms() {
 		return this.getStatusSampleList().sampleList;
@@ -169,7 +169,6 @@ public class DaemonFactory {
 	public boolean isKingdom(String name) {
 		KingdomPayload payload = new KingdomPayload(name);
 		String response = this.writeToSocket(payload);
-		System.out.println("returning " + (!response.equalsIgnoreCase("null")) + " for isKingdom(String.class)");
 		return !response.equalsIgnoreCase("null");
 	}
 	
@@ -179,6 +178,18 @@ public class DaemonFactory {
 	
 	public String getStartup(Kingdom kingdom) {
 		return this.getKingdomData(kingdom, KingdomDataType.STARTUP);
+	}
+	
+	public void setKingdomMOTD(String kingdomName, String motd) {
+		this.writeToSocket(new ModifyMOTDPayload(kingdomName, motd));
+	}
+	
+	public void setKingdomMOTD(Kingdom kingdom, String motd) {
+		this.setKingdomMOTD(kingdom.getName(), motd);
+	}
+	
+	public String getKingdomMOTD(Kingdom kingdom) {
+		return this.writeToSocket(new KingdomDataPayload(kingdom, KingdomDataType.MOTD));
 	}
 	
 	public String getKingdomData(Kingdom kingdom, KingdomDataType type) {

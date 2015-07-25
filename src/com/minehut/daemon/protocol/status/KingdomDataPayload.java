@@ -7,7 +7,7 @@ import com.minehut.daemon.protocol.PayloadType;
 public class KingdomDataPayload extends Payload {
 
 	public enum KingdomDataType {
-		STARTUP, STARTED, CRASHED;
+		STARTUP, STARTED, CRASHED, MOTD;
 	}
 	
 	public KingdomDataType dataType;

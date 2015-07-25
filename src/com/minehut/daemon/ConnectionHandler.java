@@ -65,8 +65,6 @@ public class ConnectionHandler extends Thread implements Runnable {
 				
 				this.parseRequest(requestLines);
 				this.objectOutputStream.writeObject(this.response);
-				System.out.println("out response: " + this.response);
-				System.out.println();
 			} catch (Exception e) {
 				e.printStackTrace();
 				this.finish();
@@ -77,9 +75,6 @@ public class ConnectionHandler extends Thread implements Runnable {
 	
 	private void parseRequest(ArrayList<String> request) {
 		PayloadType type = PayloadType.valueOf(request.get(0));
-		//System.out.println(request.get(0));
-		//System.out.println(request.get(1));
-		//System.out.println();
 		if (type == PayloadType.PLAYER_KINGDOMS_LIST) {
 			PlayerKingdomsListPayload payload = this.daemon.gson.fromJson(request.get(1), PlayerKingdomsListPayload.class);
 			StatusPlayerKingdomsList out = new StatusPlayerKingdomsList();
@@ -117,11 +112,8 @@ public class ConnectionHandler extends Thread implements Runnable {
 			StartPayload payload = this.daemon.gson.fromJson(request.get(1), StartPayload.class);
 			int port = this.daemon.getFreePort();
 			if (port!=-1) {
-				System.out.println("Found free port: " + port);
 				this.response = "{port:" + port + "}";
 				this.daemon.addKingdomServer(new KingdomServer(payload.kingdom, port));
-			} else {
-				System.out.println("No free port found");
 			}
 		} else 
 		if (type == PayloadType.STOP) {
@@ -138,7 +130,9 @@ public class ConnectionHandler extends Thread implements Runnable {
 				} else {
 					this.response = "offline";
 				}
-
+			} else
+			if (payload.dataType == KingdomDataType.MOTD) {
+				this.response = FileUtil.getKingdomMOTD(payload.kingdom);
 			}
 		} else
 		if (type == PayloadType.KINGDOM) {
@@ -165,8 +159,6 @@ public class ConnectionHandler extends Thread implements Runnable {
 		if (type == PayloadType.ADDON_LIST) {
 			this.response = this.daemon.gson.toJson(this.daemon.getAddons());
 		}
-		
-//		System.out.println("FOUND PAYLOAD TYPE: " + type);
 	}
 
 

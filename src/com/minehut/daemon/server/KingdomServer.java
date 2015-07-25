@@ -8,6 +8,7 @@ import java.io.RandomAccessFile;
 import com.minehut.daemon.Kingdom;
 import com.minehut.daemon.KingdomsDaemon;
 import com.minehut.daemon.tools.FileUtil;
+import com.minehut.daemon.tools.LogType;
 
 public class KingdomServer extends Thread {
 	
@@ -64,18 +65,41 @@ public class KingdomServer extends Thread {
 	
 	private long lastTick = 0L, pointer, lastChecked = 0L;
 	
+	public int getMemory() { //TODO: Should Famous/other ranks have different memeory
+		String rank = this.kingdom.getOwner().rank.toLowerCase();
+		if (rank.equals("admin")||rank.equals("owner")||rank.equals("dev")) {
+			return 4096;
+		} else
+		if (rank.equals("champ") || rank.equals("mod")) {
+			return 3072;
+		} else
+		if (rank.equals("legend")) {
+			return 2048;
+		} else 
+		if (rank.equals("super")) {
+			return 1792;
+		} else
+		if (rank.equals("mega")) {
+			return 1024;
+		} else {
+			return 768;
+		}
+	}
+	
+	
 	@Override
 	public void run() {
 		if (id==-1) 
 			return;
 		
 		try {
+			KingdomsDaemon.getInstance().getUtils().logLine(LogType.INFO, "Starting kingdom" + this.id + " on port " + this.port + " @ " + System.currentTimeMillis());
 			this.setState(ServerState.STARTING);
 			FileUtil.editServerProperties(this.kingdom, this.port);
 
 			log = new File("/home/rdillender/daemon/kingdoms/" + this.kingdom.getOwner().playerUUID + "/kingdom" + this.kingdom.id + "/screenlog.0");
 			
-			ProcessBuilder pb = new ProcessBuilder("/bin/bash", "-c", "screen -dmLS kingdom" + this.id + " bash -c 'java -XX:MaxPermSize=128M -Xmx768M -Xms768M -jar spigot.jar nogui'");
+			ProcessBuilder pb = new ProcessBuilder("/bin/bash", "-c", "screen -dmLS kingdom" + this.id + " bash -c 'java -XX:MaxPermSize=128M -Xmx" + this.getMemory() + "M -Xms" + this.getMemory() + "M -jar spigot.jar nogui'");
 			pb.directory(new File("/home/rdillender/daemon/kingdoms/" + this.kingdom.getOwner().playerUUID + "/kingdom" + this.kingdom.id));
 			pb.start().waitFor();
 			//this.setState(ServerState.STARTING);
@@ -91,7 +115,6 @@ public class KingdomServer extends Thread {
 		    	if (this.lastChecked == 0)
 		    		this.lastChecked = System.currentTimeMillis();
 		    	if (((System.currentTimeMillis() - this.lastTick) / 1000) >= 10) {
-		    		//System.out.println("KingdomServer Thread ticking at " + System.currentTimeMillis() + " for kingdom" + this.id);
 		    		if (this.emptyTick >= 9) { //After 6 * (10 seconds) checks with no players online the server will shutdown
 			    		if (this.state!=ServerState.SHUTDOWN) {
 			    			this.setState(ServerState.SHUTDOWN);
@@ -172,24 +195,19 @@ public class KingdomServer extends Thread {
 		this.lastReadTime = System.currentTimeMillis();
 		if (line.contains("INFO]: Stopping server")) {
 			this.setState(ServerState.SHUTDOWN);
-			System.out.println(line);
 		} else if (line.contains(" INFO]: Done (")) {
 			this.startup = "100%";
 			this.setState(ServerState.RUNNING);
-			System.out.println(line);
 		} else if (line.contains("FAILED TO BIND TO PORT!")) {
 			this.setState(ServerState.SHUTDOWN);
-			System.out.println(line);
 		} else if (line.contains("Preparing spawn area: ")) {
 			String[] startupArray = line.split("Preparing spawn area: ");
 			this.startup = startupArray[1];
-			System.out.println("Updated Startup Status: " + startupArray[1]);
 		}
 	}
 	
 	public void setState(ServerState state) {
 		this.state = state;
-		//System.out.println("kingdom" + this.id + " state set to " + state.getState());
 	}
 	
 	public Process sendScreenCommand(String cmd) {

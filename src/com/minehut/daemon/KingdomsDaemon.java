@@ -146,7 +146,7 @@ public class KingdomsDaemon extends Thread implements Runnable {
 
 		found.put("name", kingdom.getName());
 		kingdomsCollection.findAndModify(key, found);
-		System.out.println("Updated kingdom name from (" + oldName + ") to (" + kingdom.getName() + ")");
+		this.utils.logLine(LogType.INFO, "Updated kingdom name from (" + oldName + ") to (" + kingdom.getName() + ")");
 	}
 	
 	public List<Addon> getAddons() {
@@ -264,7 +264,6 @@ public class KingdomsDaemon extends Thread implements Runnable {
 				for (File kd : s.listFiles()) {
 					Kingdom kingdom;
 					try {
-						System.out.println(kd.getPath() + "/data.json");
 						BufferedReader br = new BufferedReader(new FileReader(kd.getPath() + "/data.json"));
 						kingdom = this.gson.fromJson(br, Kingdom.class);
 						

@@ -28,14 +28,48 @@ public class FileUtil {
             FileInputStream configStream = new FileInputStream(propsFileName);
             props.load(configStream);
             configStream.close();
-            System.out.println("Detected old port: " + props.getProperty("server-port"));
 
             //modifies existing or adds new property
             String newPort = Integer.toString(port);
-            System.out.println("Setting new port to: " + newPort);
             props.setProperty("server-port", newPort);
 
             //save modified property file
+            FileOutputStream output = new FileOutputStream(propsFileName);
+            props.store(output, "This description goes to the header of a file");
+            output.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    public static String getKingdomMOTD(Kingdom kd) {
+    	String motd = "Default Kingdom message of the day.";
+    	
+    	try {
+            Properties props = new Properties();
+            String propsFileName = "/home/rdillender/daemon/kingdoms/" + kd.getOwner().playerUUID + "/kingdom" + kd.id + "/server.properties";
+            FileInputStream configStream = new FileInputStream(propsFileName);
+            props.load(configStream);
+            configStream.close();
+            
+            motd = props.getProperty("motd");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    	
+    	return motd;
+    }
+    
+    public static void editKingdomMOTD(Kingdom kd, String motd) {
+    	try {
+            Properties props = new Properties();
+            String propsFileName = "/home/rdillender/daemon/kingdoms/" + kd.getOwner().playerUUID + "/kingdom" + kd.id + "/server.properties";
+            FileInputStream configStream = new FileInputStream(propsFileName);
+            props.load(configStream);
+            configStream.close();
+            
+            props.setProperty("motd", motd);
+
             FileOutputStream output = new FileOutputStream(propsFileName);
             props.store(output, "This description goes to the header of a file");
             output.close();
@@ -63,7 +97,6 @@ public class FileUtil {
     
     public static void resetKingdom(Kingdom kingdom) {
     	File home = new File(kingdom.getHomeDir());
-    	System.out.println("Resetting Kingdom Files " + kingdom.getHomeDir());
     	File[] kingdomFiles = home.listFiles();
     	if(kingdomFiles!=null) {
     		for (File file : kingdomFiles) {
@@ -74,9 +107,7 @@ public class FileUtil {
     }
     
     private static void deleteFiles(File file) {
-    	System.out.println("Removing " + file.getPath());
     	if (file.getName().contains("screenlog")) {
-    		System.out.println("SCREEN LOG FOUND, SKIPPING");
     		return;
     	}
     	if (file.isDirectory()) {
@@ -97,7 +128,6 @@ public class FileUtil {
     			home.mkdir();
     		saveKingdom(kingdom);
     		File sampleDir = new File("./sample-kingdoms/" + kingdom.getSampleKingdom().getType() + "/install");
-    		System.out.println(sampleDir.toString());
     		copyFile(sampleDir, home);
     		
     	//}

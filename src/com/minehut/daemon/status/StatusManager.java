@@ -45,10 +45,8 @@ public class StatusManager {
                     DBObject found = KingdomsDaemon.getInstance().getServersCollection().findOne(query);
 
                     if (found == null) {
-//                        System.out.println("Inserting Kingdom Status: " + kingdom.getName());
                         KingdomsDaemon.getInstance().getServersCollection().insert(createDBObject(kingdom));
                     } else {
-//                        System.out.println("Found and updating Kingdom Status: " + kingdom.getName());
                         KingdomsDaemon.getInstance().getServersCollection().findAndModify(query, createDBObject(kingdom));
                     }
 
