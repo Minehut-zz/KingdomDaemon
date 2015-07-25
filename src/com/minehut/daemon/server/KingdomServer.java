@@ -124,6 +124,7 @@ public class KingdomServer extends Thread {
 		    			this.shutdown(false);
 						break;
 		    		}
+		    		System.out.println("Current player count for kingdom" + this.id + " is " + this.playerCount);
 		    		if (this.playerCount<=0 && this.state == ServerState.RUNNING) {
 						emptyTick++; //If no players are online tick this up by 1 until it hits 6
 					} else {
@@ -175,7 +176,9 @@ public class KingdomServer extends Thread {
 	public long lastReadTime;
 	
 	public void parseLine(String line) {
-		if (((System.currentTimeMillis() - this.previousListSendTime) / 1000) >= 3 && this.state == ServerState.RUNNING) {
+		if (previousListSendTime==0L) {
+			previousListSendTime = System.currentTimeMillis();
+		}
 			/* Retrieve Player Count */
 			if (line.contains("There are ") && line.contains(" players online:")) {
 				String[] firstPart = line.split("There are ");
@@ -184,14 +187,16 @@ public class KingdomServer extends Thread {
 				int count = Integer.parseInt(countString[0]);
 				//TODO: countString[1] is the max players
 				this.playerCount = count;
-				
+				System.out.println("New player count for kingdom" + this.id + " has been set to " + this.playerCount);
 			} else {
-				if (!line.startsWith(">")) {
-					this.sendScreenCommand("list");
-					this.previousListSendTime = System.currentTimeMillis();
+				if (((System.currentTimeMillis() - this.previousListSendTime) / 1000) >= 3 && this.state == ServerState.RUNNING) {
+					if (!line.startsWith(">")) {
+						this.sendScreenCommand("list");
+						this.previousListSendTime = System.currentTimeMillis();
+					}
 				}
 			}
-		}
+		
 		this.lastReadTime = System.currentTimeMillis();
 		if (line.contains("INFO]: Stopping server")) {
 			this.setState(ServerState.SHUTDOWN);
