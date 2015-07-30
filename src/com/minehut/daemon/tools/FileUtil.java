@@ -22,7 +22,7 @@ public class FileUtil {
         try {
             //Edit server.properties
             Properties props = new Properties();
-            String propsFileName = "/home/rdillender/daemon/kingdoms/" + kingdom.getOwner().playerUUID + "/kingdom" + kingdom.id + "/server.properties";
+            String propsFileName = "/home/daemon/kingdoms/" + kingdom.getOwner().playerUUID + "/kingdom" + kingdom.id + "/server.properties";
 
             //first load old one:
             FileInputStream configStream = new FileInputStream(propsFileName);
@@ -47,7 +47,7 @@ public class FileUtil {
     	
     	try {
             Properties props = new Properties();
-            String propsFileName = "/home/rdillender/daemon/kingdoms/" + kd.getOwner().playerUUID + "/kingdom" + kd.id + "/server.properties";
+            String propsFileName = "/home/daemon/kingdoms/" + kd.getOwner().playerUUID + "/kingdom" + kd.id + "/server.properties";
             FileInputStream configStream = new FileInputStream(propsFileName);
             props.load(configStream);
             configStream.close();
@@ -63,7 +63,7 @@ public class FileUtil {
     public static void editKingdomMOTD(Kingdom kd, String motd) {
     	try {
             Properties props = new Properties();
-            String propsFileName = "/home/rdillender/daemon/kingdoms/" + kd.getOwner().playerUUID + "/kingdom" + kd.id + "/server.properties";
+            String propsFileName = "/home/daemon/kingdoms/" + kd.getOwner().playerUUID + "/kingdom" + kd.id + "/server.properties";
             FileInputStream configStream = new FileInputStream(propsFileName);
             props.load(configStream);
             configStream.close();

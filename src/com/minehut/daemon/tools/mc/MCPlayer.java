@@ -4,30 +4,23 @@ import java.util.UUID;
 
 public class MCPlayer {
 
-	public String playerUUID, playerName, rank;
+	public String playerUUID, rank;
 	
 	public MCPlayer() {
 		this.playerUUID = "NULL";
 		this.rank = "regular";
 	}
 
-	public MCPlayer(String name, UUID uuid) {
-		this.playerName = name;
+	public MCPlayer( UUID uuid) {
 		this.playerUUID = uuid.toString();
 		this.rank = "regular";
 	}
 
-	public MCPlayer(String name, UUID uuid, String rank) {
-		this.playerName = name;
+	public MCPlayer(UUID uuid, String rank) {
 		this.playerUUID = uuid.toString();
 		this.rank = rank;
 	}
-	
-	public MCPlayer setPlayerName(String name) {
-		this.playerName = name;
-		return this;
-	}
-	
+
 	public MCPlayer setPlayerRank(String rank) {
 		this.rank = rank;
 		return this;

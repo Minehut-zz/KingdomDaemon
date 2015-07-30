@@ -129,11 +129,7 @@ public class DaemonFactory {
 	public void renameKingdom(String oldName, String newName) {
 		this.writeToSocket(new RenamePayload(oldName, newName));
 	}
-	
-	public void createKingdom(MCPlayer player, SampleKingdom sample) {
-		this.createKingdom(player, sample, player.playerName + "'s kingdom");
-	}
-	
+
 	public void startKingdom(Kingdom kingdom) {
 		StartPayload payload = new StartPayload(kingdom);
 		this.writeToSocket(payload);

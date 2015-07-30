@@ -69,7 +69,7 @@ public class Start {
 		}*/
 		
 		DaemonFactory daemonFactory = new DaemonFactory("199.187.182.168", 10420);
-		MCPlayer sq = new MCPlayer().setPlayerUUID("squeecksUUID").setPlayerName("Squeecks").setPlayerRank("admin");
+		MCPlayer sq = new MCPlayer().setPlayerUUID("squeecksUUID").setPlayerRank("admin");
 		if (daemonFactory.hasKingdom(sq)) {
 			for (Kingdom kd : daemonFactory.getPlayerKingdoms(sq)) {
 				daemonFactory.startKingdom(kd);
@@ -80,7 +80,7 @@ public class Start {
 			for (SampleKingdom skd : samples) {
 				System.out.println("Found sample kingdom: " + skd.getName());
 				if (skd.getType().equals("default")) {
-					daemonFactory.createKingdom(sq, skd);
+					//daemonFactory.createKingdom(sq, skd);
 				}
 			}
 			System.out.println("No kingdoms found for player");

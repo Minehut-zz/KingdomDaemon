@@ -103,10 +103,10 @@ public class KingdomServer extends Thread {
 			this.setState(ServerState.STARTING);
 			FileUtil.editServerProperties(this.kingdom, this.port);
 
-			log = new File("/home/rdillender/daemon/kingdoms/" + this.kingdom.getOwner().playerUUID + "/kingdom" + this.kingdom.id + "/screenlog.0");
+			log = new File("/home/daemon/kingdoms/" + this.kingdom.getOwner().playerUUID + "/kingdom" + this.kingdom.id + "/screenlog.0");
 			
 			ProcessBuilder pb = new ProcessBuilder("/bin/bash", "-c", "screen -dmLS kingdom" + this.id + " bash -c 'java -XX:MaxPermSize=128M -Xmx" + this.getMemory() + "M -Xms" + this.getMemory() + "M -jar spigot.jar nogui'");
-			pb.directory(new File("/home/rdillender/daemon/kingdoms/" + this.kingdom.getOwner().playerUUID + "/kingdom" + this.kingdom.id));
+			pb.directory(new File("/home/daemon/kingdoms/" + this.kingdom.getOwner().playerUUID + "/kingdom" + this.kingdom.id));
 			pb.start().waitFor();
 			//this.setState(ServerState.STARTING);
 			
