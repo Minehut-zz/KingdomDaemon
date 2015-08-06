@@ -112,6 +112,10 @@ public class ConnectionHandler extends Thread implements Runnable {
 		} else
 		if (type == PayloadType.START) {
 			StartPayload payload = this.daemon.gson.fromJson(request.get(1), StartPayload.class);
+			if (this.daemon.getServers().size() >= 65) {
+				this.response = "{errorMessage:'MAX KINGDOM COUNT'}";
+				return;
+			}
 			int port = this.daemon.getFreePort();
 			if (port!=-1) {
 				this.response = "{port:" + port + "}";
