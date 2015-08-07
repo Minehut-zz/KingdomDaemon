@@ -34,22 +34,24 @@ public class StatusManager {
         public void run() {
             this.localUploadInfos.clear();
 
-            for (KingdomServer kingdomServer : KingdomsDaemon.getInstance().getServers()) {
-                this.localUploadInfos.add(new KingdomUploadInfo(kingdomServer.getKingdom().getName(), kingdomServer.getMotd(), kingdomServer.kingdom.getOwner().rank, kingdomServer.getPort(), kingdomServer.getPlayerCount(), kingdomServer.getMaxPlayers()));
-            }
+            if (!KingdomsDaemon.getInstance().getServers().isEmpty()) {
+                for (KingdomServer kingdomServer : KingdomsDaemon.getInstance().getServers()) {
+                    this.localUploadInfos.add(new KingdomUploadInfo(kingdomServer.getKingdom().getName(), kingdomServer.getMotd(), kingdomServer.kingdom.getOwner().rank, kingdomServer.getPort(), kingdomServer.getPlayerCount(), kingdomServer.getMaxPlayers()));
+                }
 
-            if (!localUploadInfos.isEmpty()) {
-                for (KingdomUploadInfo kingdom : localUploadInfos) {
+                if (!localUploadInfos.isEmpty()) {
+                    for (KingdomUploadInfo kingdom : localUploadInfos) {
 
-                    DBObject query = new BasicDBObject("name", "kingdom" + kingdom.getName());
-                    DBObject found = KingdomsDaemon.getInstance().getServersCollection().findOne(query);
+                        DBObject query = new BasicDBObject("name", "kingdom" + kingdom.getName());
+                        DBObject found = KingdomsDaemon.getInstance().getServersCollection().findOne(query);
 
-                    if (found == null) {
-                        KingdomsDaemon.getInstance().getServersCollection().insert(createDBObject(kingdom));
-                    } else {
-                        KingdomsDaemon.getInstance().getServersCollection().findAndModify(query, createDBObject(kingdom));
+                        if (found == null) {
+                            KingdomsDaemon.getInstance().getServersCollection().insert(createDBObject(kingdom));
+                        } else {
+                            KingdomsDaemon.getInstance().getServersCollection().findAndModify(query, createDBObject(kingdom));
+                        }
+
                     }
-
                 }
             }
         }
