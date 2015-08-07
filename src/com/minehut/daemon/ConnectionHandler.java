@@ -1,6 +1,6 @@
 package com.minehut.daemon;
 
-import java.io.IOException;
+/*import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
@@ -25,10 +25,9 @@ import com.minehut.daemon.protocol.stop.StopPayload;
 import com.minehut.daemon.server.KingdomServer;
 import com.minehut.daemon.server.KingdomServer.ServerState;
 import com.minehut.daemon.tools.FileUtil;
-import com.minehut.daemon.tools.LogType;
-
+import com.minehut.daemon.tools.LogType;*/
 public class ConnectionHandler extends Thread implements Runnable {
-
+/*
 	private KingdomsDaemon daemon;
 	
 	private ObjectInputStream objectInputStream;
@@ -196,5 +195,5 @@ public class ConnectionHandler extends Thread implements Runnable {
 			this.finish();
 		}
 	}
-	
+	*/
 }

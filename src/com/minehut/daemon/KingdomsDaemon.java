@@ -49,7 +49,11 @@ public class KingdomsDaemon extends Thread implements Runnable {
 	private DBCollection kingdomsCollection;
 	private DBCollection serversCollection;
 	
+	private SocketFactory socketFacotry;
+	
 	public KingdomsDaemon() {
+		
+		
 		
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			@Override
@@ -80,6 +84,7 @@ public class KingdomsDaemon extends Thread implements Runnable {
 		this.initServerSocket();
 
 		this.statusManager = new StatusManager();
+		this.socketFacotry = new SocketFactory();
 	}
 	
 	private void connect() {
@@ -375,8 +380,10 @@ public class KingdomsDaemon extends Thread implements Runnable {
 		if (sock!=null) {
 			this.utils.logLine(LogType.DEBUG, sock.toString());
 			
-			ConnectionHandler connectionHandler = new ConnectionHandler(this, sock);
-			connectionHandler.start();
+			this.socketFacotry.handlerQueue.add(new SocketHandler(this.socketFacotry, sock)); //Add sock to queue to be parsed
+			//No more thread for each connection
+			//ConnectionHandler connectionHandler = new ConnectionHandler(this, sock);
+			//connectionHandler.start();
 		}
 	}
 	
