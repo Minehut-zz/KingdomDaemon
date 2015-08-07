@@ -130,9 +130,10 @@ public class DaemonFactory {
 		this.writeToSocket(new RenamePayload(oldName, newName));
 	}
 
-	public void startKingdom(Kingdom kingdom) {
+	public boolean startKingdom(Kingdom kingdom) {
 		StartPayload payload = new StartPayload(kingdom);
-		this.writeToSocket(payload);
+		String response = this.writeToSocket(payload);
+		return !response.equalsIgnoreCase("KINGDOMS_FULL");
 	}
 	
 	public void resetKingdom(Kingdom kingdom) {
