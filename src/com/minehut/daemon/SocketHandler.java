@@ -6,7 +6,7 @@ public class SocketHandler {
 
 	private Socket sock;
 	private SocketFactory parentFactory;
-	private long time = System.currentTimeMillis();
+	//private long time = System.currentTimeMillis();
 	
 	public SocketHandler(SocketFactory parent, Socket socket) {
 		this.parentFactory = parent;

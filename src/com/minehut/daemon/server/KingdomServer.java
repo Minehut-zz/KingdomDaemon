@@ -126,7 +126,7 @@ public class KingdomServer extends Thread {
 		    	if (this.lastChecked == 0)
 		    		this.lastChecked = System.currentTimeMillis();
 		    	if (((System.currentTimeMillis() - this.lastTick) / 1000) >= 10) {
-		    		if (this.emptyTick >= 9) { //After 6 * (10 seconds) checks with no players online the server will shutdown
+		    		if (this.emptyTick >= 15) { //After 6 * (10 seconds) checks with no players online the server will shutdown
 			    		if (this.state!=ServerState.SHUTDOWN) {
 			    			this.setState(ServerState.SHUTDOWN);
 			    		}
@@ -146,6 +146,12 @@ public class KingdomServer extends Thread {
 
 		    	if ((System.currentTimeMillis() - this.lastChecked) / 1000 >= 1) { //We can change this up to ms/s/minute or whatever we need
 					try {
+						if (log==null)
+							return;
+						if (!log.exists())
+							log.createNewFile();
+						if (!log.isFile()||log.isDirectory()||!log.canRead())
+							return;
 						RandomAccessFile raf = new RandomAccessFile(log, "r");
 						long length = raf.length();
 						if (length < pointer) {
@@ -168,6 +174,11 @@ public class KingdomServer extends Thread {
 					}
 					lastChecked = System.currentTimeMillis();
 				}
+		    	try {
+		    		Thread.sleep(50);
+		    	} catch (Exception e) {
+		    		e.printStackTrace();
+		    	}
 		    }
 		} catch (IOException | InterruptedException e) {
 			e.printStackTrace();
@@ -176,7 +187,7 @@ public class KingdomServer extends Thread {
 
 	public void shutdown(boolean daemon) throws InterruptedException, IOException {
 		new ProcessBuilder("/bin/bash", "-c", "screen -X -S kingdom" + this.id + " quit").start().waitFor(); //Should kill the screen after the kingdom shuts down
-		log.delete();
+		//log.delete();
 		if (!daemon) {
 			KingdomsDaemon.getInstance().getServers().remove(this);
 			KingdomsDaemon.getInstance().getPorts().remove(Integer.toString(this.id));
@@ -195,7 +206,7 @@ public class KingdomServer extends Thread {
 				String[] firstPart = line.split("There are ");
 				String[] secondPart = firstPart[1].split(" players online:");
 				String countString[] = secondPart[0].split("/");
-				int count = Integer.parseInt(countString[0].replace("Â§c", ""));
+				int count = Integer.parseInt(countString[0].replace("§c", ""));
 				//TODO: countString[1] is the max players
 				this.playerCount = count;
 				System.out.println("New player count for kingdom" + this.id + " has been set to " + this.playerCount);
@@ -211,7 +222,7 @@ public class KingdomServer extends Thread {
 		this.lastReadTime = System.currentTimeMillis();
 		if (line.contains("INFO]: Stopping server")) {
 			this.setState(ServerState.SHUTDOWN);
-		} else if (line.contains(" INFO]: Done (")) {
+		} else if (line.contains("INFO]: Done (")) {
 			this.startup = "100%";
 			this.setState(ServerState.RUNNING);
 		} else if (line.contains("FAILED TO BIND TO PORT!")) {

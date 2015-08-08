@@ -132,14 +132,14 @@ public class SocketFactory {
 						} else
 						if (type == PayloadType.START) {
 							StartPayload payload = KingdomsDaemon.getInstance().gson.fromJson(requestLines.get(1), StartPayload.class);
-							if (KingdomsDaemon.getInstance().getServers().size() >= 65) {
+							if (KingdomsDaemon.getInstance().getServers().size() < 65) {
 								response = "KINGDOMS_FULL";
-								return;
-							}
-							int port = KingdomsDaemon.getInstance().getFreePort();
-							if (port!=-1) {
-								response = "{port:" + port + "}";
-								KingdomsDaemon.getInstance().addKingdomServer(new KingdomServer(payload.kingdom, port));
+							} else {
+								int port = KingdomsDaemon.getInstance().getFreePort();
+								if (port!=-1) {
+									response = "{port:" + port + "}";
+									KingdomsDaemon.getInstance().addKingdomServer(new KingdomServer(payload.kingdom, port));
+								}
 							}
 						} else 
 						if (type == PayloadType.STOP) {
@@ -214,6 +214,12 @@ public class SocketFactory {
 					}
 				}
 			}
+			
+			try {
+	    		Thread.sleep(50);
+	    	} catch (Exception e) {
+	    		e.printStackTrace();
+	    	}
 		}
 	}
 }

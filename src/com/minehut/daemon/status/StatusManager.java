@@ -54,6 +54,12 @@ public class StatusManager {
                     }
                 }
             }
+            
+            try {
+	    		Thread.sleep(50);
+	    	} catch (Exception e) {
+	    		e.printStackTrace();
+	    	}
         }
 
         public DBObject createDBObject(KingdomUploadInfo kingdom) {
