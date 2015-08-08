@@ -4,11 +4,14 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.UUID;
 
 import com.minehut.daemon.Kingdom;
 import com.minehut.daemon.KingdomsDaemon;
 import com.minehut.daemon.tools.FileUtil;
 import com.minehut.daemon.tools.LogType;
+import com.mongodb.BasicDBObject;
+import com.mongodb.DBObject;
 
 public class KingdomServer extends Thread {
 
@@ -72,23 +75,33 @@ public class KingdomServer extends Thread {
 	private long lastTick = 0L, pointer, lastChecked = 0L;
 
 	public int getMemory() { //TODO: Should Famous/other ranks have different memeory
-		String rank = this.kingdom.getOwner().rank.toLowerCase();
-		if (rank.equals("admin")||rank.equals("owner")||rank.equals("dev")) {
+//		String rank = this.kingdom.getOwner().rank.toLowerCase();
+		String rank = this.getRank(this.kingdom.getOwner().playerUUID);
+		if (rank.equals("admin") || rank.equals("owner") || rank.equals("dev")) {
 			return 4096;
-		} else
-		if (rank.equals("champ") || rank.equals("mod")) {
+		} else if (rank.equals("champ") || rank.equals("mod")) {
 			return 3072;
-		} else
-		if (rank.equals("legend")) {
+		} else if (rank.equals("legend")) {
 			return 2048;
-		} else
-		if (rank.equals("super")) {
+		} else if (rank.equals("super")) {
 			return 1792;
-		} else
-		if (rank.equals("mega")) {
+		} else if (rank.equals("mega")) {
 			return 1024;
 		} else {
 			return 768;
+		}
+	}
+
+	public String getRank(String uuid) {
+		DBObject r = new BasicDBObject("uuid", uuid);
+		DBObject found = KingdomsDaemon.getInstance().playersCollection.findOne(r);
+
+		if (found != null) {
+			String rankName = (String) found.get("rank");
+			return rankName.toLowerCase();
+		} else {
+			/* Player not found, return default */
+			return "regular";
 		}
 	}
 
@@ -206,7 +219,7 @@ public class KingdomServer extends Thread {
 				String[] firstPart = line.split("There are ");
 				String[] secondPart = firstPart[1].split(" players online:");
 				String countString[] = secondPart[0].split("/");
-				int count = Integer.parseInt(countString[0].replace("§c", ""));
+				int count = Integer.parseInt(countString[0].replace("ï¿½c", ""));
 				//TODO: countString[1] is the max players
 				this.playerCount = count;
 				System.out.println("New player count for kingdom" + this.id + " has been set to " + this.playerCount);

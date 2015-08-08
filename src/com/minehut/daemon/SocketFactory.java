@@ -132,7 +132,7 @@ public class SocketFactory {
 						} else
 						if (type == PayloadType.START) {
 							StartPayload payload = KingdomsDaemon.getInstance().gson.fromJson(requestLines.get(1), StartPayload.class);
-							if (KingdomsDaemon.getInstance().getServers().size() < 65) {
+							if (KingdomsDaemon.getInstance().getServers().size() > 70) {
 								response = "KINGDOMS_FULL";
 							} else {
 								int port = KingdomsDaemon.getInstance().getFreePort();

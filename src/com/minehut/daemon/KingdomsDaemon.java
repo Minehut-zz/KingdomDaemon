@@ -48,6 +48,7 @@ public class KingdomsDaemon extends Thread implements Runnable {
 	private DB db;
 	private DBCollection kingdomsCollection;
 	private DBCollection serversCollection;
+	public DBCollection playersCollection;
 	
 	private SocketFactory socketFacotry;
 	
@@ -93,6 +94,7 @@ public class KingdomsDaemon extends Thread implements Runnable {
 			this.db = mongo.getDB("minehut");
 			this.kingdomsCollection = db.getCollection("kingdoms");
 			this.serversCollection = db.getCollection("servers");
+			this.playersCollection = db.getCollection("players");
 
 			if (this.db == null) {
 				System.out.println("Couldn't connect to database, enabling offline mode.");
