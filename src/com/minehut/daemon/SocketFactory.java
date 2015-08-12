@@ -34,6 +34,8 @@ public class SocketFactory {
 
 	public ArrayList<SocketHandler> handlerQueue;
 	
+	
+	
 	public SocketFactory() {
 		this.handlerQueue = new ArrayList<SocketHandler>();
 		

@@ -148,7 +148,7 @@ public class KingdomServer extends Thread {
 		    			this.shutdown(false);
 						break;
 		    		}
-		    		System.out.println("Current player count for kingdom" + this.id + " is " + this.playerCount);
+		    		//System.out.println("Current player count for kingdom" + this.id + " is " + this.playerCount);
 		    		if (this.playerCount<=0 && this.state == ServerState.RUNNING) {
 						emptyTick++; //If no players are online tick this up by 1 until it hits 6
 					} else {
@@ -219,10 +219,10 @@ public class KingdomServer extends Thread {
 				String[] firstPart = line.split("There are ");
 				String[] secondPart = firstPart[1].split(" players online:");
 				String countString[] = secondPart[0].split("/");
-				int count = Integer.parseInt(countString[0].replace("ï¿½c", ""));
+				int count = Integer.parseInt(countString[0].replace("§c", ""));
 				//TODO: countString[1] is the max players
 				this.playerCount = count;
-				System.out.println("New player count for kingdom" + this.id + " has been set to " + this.playerCount);
+				//System.out.println("New player count for kingdom" + this.id + " has been set to " + this.playerCount);
 			} else {
 				if (((System.currentTimeMillis() - this.previousListSendTime) / 1000) >= 3 && this.state == ServerState.RUNNING) {
 					if (!line.startsWith(">")) {

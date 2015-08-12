@@ -165,22 +165,14 @@ public class KingdomsDaemon extends Thread implements Runnable {
 		server.start();
 	}
 	
-	public boolean usedPort(int port) {
-		for (KingdomServer server : this.servers) {
-			if (server.getID()==port)
-				return true;
-		}
-		return false;
-	}
-	
 	public void clearPort(int port) {
 		this.ports.remove(port);
 	}
 	
 	public int getFreePort() {
 		int port = -1;
-		for (int i = 1; i < 66; i++) {
-			if (!this.usedPort(i)&&!ports.contains(Integer.toString(i))) {
+		for (int i = 1; i < 71; i++) {
+			if (!ports.contains(Integer.toString(i))) {
 				port = defaultPort + i;
 				ports.add(Integer.toString(i));
 				break;
