@@ -92,16 +92,10 @@ public class KingdomsDaemon extends Thread implements Runnable {
 		try {
 			this.mongo = new MongoClient("localhost", 27017);
 			this.db = mongo.getDB("minehut");
+			db.addOption(Bytes.QUERYOPTION_NOTIMEOUT);
 			this.kingdomsCollection = db.getCollection("kingdoms");
 			this.serversCollection = db.getCollection("servers");
 			this.playersCollection = db.getCollection("players");
-
-			if (this.db == null) {
-				System.out.println("Couldn't connect to database, enabling offline mode.");
-				return;
-			} else {
-				System.out.println("Successfully connected to database :)");
-			}
 
 		} catch (Exception e) {
 			System.out.println("Couldn't connect to database, enabling offline mode.");
